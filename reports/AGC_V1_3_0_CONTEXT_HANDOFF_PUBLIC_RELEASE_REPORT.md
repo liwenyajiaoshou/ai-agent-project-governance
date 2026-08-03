@@ -26,7 +26,9 @@
 - PASS: lifecycle smoke: preview zero-write; enable; disable preserves history; uninstall preserves history.
 - PASS: `PYTHONDONTWRITEBYTECODE=1 python3 scripts/run_governance_ci.py` — 8/8 gates.
 - PASS: `git diff --check` and `git diff --cached --check`.
-- PENDING: remote PR, merge, tag, and GitHub Release.
+- PASS: PR [#9](https://github.com/vanlew1/ai-agent-project-governance/pull/9) merged at `c6c24f4ea795c833089f8778e7070d3df0ea81b4`.
+- PASS: annotated tag `v1.3.0` created and pushed at `c6c24f4ea795c833089f8778e7070d3df0ea81b4`.
+- PASS: [GitHub Release v1.3.0](https://github.com/vanlew1/ai-agent-project-governance/releases/tag/v1.3.0) published.
 
 ## Compatibility
 
