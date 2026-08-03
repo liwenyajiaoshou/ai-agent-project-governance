@@ -37,7 +37,7 @@ tasks:
         repeatable_smoke:
           - "PASS: preview zero-write; enable; disable preserves history; uninstall preserves history"
           - "PASS: git diff --check and git diff --cached --check"
-    notes: "Release work is isolated from the dirty Build Week worktree. Remote release actions are authorized by the v1.3.0 owner-approved plan; PR, merge, tag, and Release identifiers are recorded in the release report."
+    notes: "Release work was isolated from the dirty Build Week worktree. PR #9 merged at c6c24f4; tag v1.3.0 and its GitHub Release were published."
 
   - task_id: "AGC-OSS-GROWTH-04"
     title: "Controlled distribution assets and tracking"
