@@ -6,11 +6,26 @@
 
 [![Python](https://img.shields.io/badge/runtime-Python-blue)](requirements-governance.txt)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/version-1.2.0-blue.svg)](VERSION)
+[![Version](https://img.shields.io/badge/version-1.3.0-blue.svg)](VERSION)
 
 [English](README.md) | [简体中文](README.zh-CN.md)
 
 ## 让 AI 编码任务可控、可验证、可收口
+
+## 可选：让长期项目更容易接着做
+
+经常切换 Codex 线程时，可以启用 Context Handoff。它会生成简短的项目状态、任务索引和交接入口。不需要时，Core 治理流程保持不变。
+
+该扩展默认关闭。请在仓库根目录先预览，再为目标项目启用：
+
+```bash
+python3 extensions/context-handoff/manage.py context-handoff preview --target /path/to/project --project-id PROJECT_A --task-id TASK_1
+python3 extensions/context-handoff/manage.py context-handoff enable --target /path/to/project --project-id PROJECT_A --task-id TASK_1 --event TASK_STARTED
+python3 extensions/context-handoff/manage.py context-handoff disable --target /path/to/project
+python3 extensions/context-handoff/manage.py context-handoff uninstall --target /path/to/project --apply
+```
+
+Disable 会保留历史；Uninstall 只移除扩展未改动的控制文件，并保留生成历史和用户修改的文件。详细说明见 [Context Handoff 扩展指南](extensions/context-handoff/README.md)。
 
 上层工作流可以帮助 Agent 澄清需求、设计和施工；本项目独立检查实际改动是否越界、证据是否有效、任务是否可以收口。
 

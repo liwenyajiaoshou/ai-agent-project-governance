@@ -2,6 +2,43 @@ version: "1.0"
 project_name: "Coding Agent Governance"
 
 tasks:
+  - task_id: "AGC-V1.3.0-CONTEXT-HANDOFF-RELEASE"
+    title: "Publish optional Context Handoff 0.1.0"
+    status: "completed"
+    level: "C"
+    owner: "repository owner"
+    scope:
+      include:
+        - "extensions/context-handoff/"
+        - "profiles/multi-agent-context/"
+        - "tests/unit/test_context_handoff_extension.py"
+        - "README.md"
+        - "README.zh-CN.md"
+        - "VERSION"
+        - "docs/CHANGELOG.md"
+        - "docs/releases/v1.3.0.md"
+        - "reports/AGC_V1_3_0_CONTEXT_HANDOFF_PUBLIC_RELEASE_REPORT.md"
+      exclude:
+        - "Build Week worktree and local state"
+        - ".agent_context_handoff instance data"
+        - "production systems, databases, and external APIs"
+    verification:
+      planned:
+        automated_tests:
+          - "PYTHONDONTWRITEBYTECODE=1 python3 -m unittest tests.unit.test_context_handoff_extension"
+          - "PYTHONDONTWRITEBYTECODE=1 python3 scripts/run_governance_ci.py"
+        repeatable_smoke:
+          - "Preview zero-write; enable; disable preserves history; uninstall preserves history"
+          - "git diff --check"
+      completed:
+        automated_tests:
+          - "PASS: PYTHONDONTWRITEBYTECODE=1 python3 -m unittest tests.unit.test_context_handoff_extension (13 tests)"
+          - "PASS: PYTHONDONTWRITEBYTECODE=1 python3 scripts/run_governance_ci.py (8/8 gates)"
+        repeatable_smoke:
+          - "PASS: preview zero-write; enable; disable preserves history; uninstall preserves history"
+          - "PASS: git diff --check and git diff --cached --check"
+    notes: "Release work is isolated from the dirty Build Week worktree. Remote release actions are authorized by the v1.3.0 owner-approved plan; PR, merge, tag, and Release identifiers are recorded in the release report."
+
   - task_id: "AGC-OSS-GROWTH-04"
     title: "Controlled distribution assets and tracking"
     status: "completed"

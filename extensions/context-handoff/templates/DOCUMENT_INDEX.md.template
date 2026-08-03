@@ -1,0 +1,9 @@
+# Document Index: {{ project_id }}
+
+This index is a derived aggregate of valid task snapshots; authoritative source documents remain unchanged.
+
+{{ entries }}
+
+ARCHIVED_TASK_COUNT: {{ archived_count }}
+
+{{ warnings }}
