@@ -1,0 +1,7 @@
+# Context Handoff: {{ project_id }} / {{ task_id }}
+
+Use the linked snapshot and authoritative files to resume work. This handoff is derived context, not an approval or closure record.
+
+- State: {{ task_status }}
+- Next gate: {{ next_gate }}
+- Next action: {{ next_action }}

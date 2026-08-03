@@ -6,11 +6,26 @@ Repository-slug migration from `ai-agent-project-governance` is pending.
 
 [![Python](https://img.shields.io/badge/runtime-Python-blue)](requirements-governance.txt)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/version-1.2.0-blue.svg)](VERSION)
+[![Version](https://img.shields.io/badge/version-1.3.0-blue.svg)](VERSION)
 
 [English](README.md) | [简体中文](README.zh-CN.md)
 
 ## Keep an AI coding task bounded and provable
+
+## Optional: make long-running projects easier to resume
+
+When you often switch Codex threads, you can enable Context Handoff. It generates a short project state, task index, and handoff entry. When you do not need it, the Core governance workflow stays unchanged.
+
+It is disabled by default. From the repository root, you can safely preview the files it would create, then enable it for a target project:
+
+```bash
+python3 extensions/context-handoff/manage.py context-handoff preview --target /path/to/project --project-id PROJECT_A --task-id TASK_1
+python3 extensions/context-handoff/manage.py context-handoff enable --target /path/to/project --project-id PROJECT_A --task-id TASK_1 --event TASK_STARTED
+python3 extensions/context-handoff/manage.py context-handoff disable --target /path/to/project
+python3 extensions/context-handoff/manage.py context-handoff uninstall --target /path/to/project --apply
+```
+
+Disable preserves generated history. Uninstall only removes the extension's unmodified control files; it preserves generated history and user-modified files. See the [Context Handoff extension guide](extensions/context-handoff/README.md) for details.
 
 Planning and coding workflows can help an agent decide what to build. This project independently checks whether the resulting work stayed in scope, used relevant evidence, and can safely close.
 

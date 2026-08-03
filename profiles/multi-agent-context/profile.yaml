@@ -1,0 +1,5 @@
+id: multi-agent-context
+display_name: Multi-agent Context (optional)
+default_enabled: false
+extensions: [context-handoff]
+description: Opt-in profile for local derived Context Handoff views; it does not alter Core-only behavior.

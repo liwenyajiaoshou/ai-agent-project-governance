@@ -1,0 +1,24 @@
+id: context-handoff
+display_name: Context Handoff Extension
+version: 0.1.0
+default_enabled: false
+compatibility:
+  core_schema: "1.0"
+capabilities: [current_state_view, document_index, report_snapshot, context_handoff, project_task_isolation]
+authority:
+  mode: derived_view_only
+  may_complete_task: false
+  may_mark_tests_passed: false
+  may_authorize_release: false
+  may_write_external_systems: false
+token_policy:
+  update_mode: event_driven
+  events: [TASK_STARTED, HARD_BLOCKED, EXECUTION_COMPLETED, PHASE_CLOSED, REMOTE_MERGED, RELEASE_STATUS_CHANGED]
+  max_current_state_lines: 100
+  max_document_index_lines: 150
+  max_snapshot_lines: 40
+owned_paths: [.agent_context_handoff/extension_state.yaml, .agent_context_handoff/ownership.json]
+generated_paths:
+  - .agent_context_handoff/<project_id>/CURRENT_STATE__<task_id>.md
+  - .agent_context_handoff/<project_id>/DOCUMENT_INDEX.md
+  - .agent_context_handoff/<project_id>/snapshots/<task_id>.yaml

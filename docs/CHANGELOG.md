@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.3.0] - 2026-08-03
+
+### Added
+
+- Optional Context Handoff extension with a current project state view, multi-task document index, and a new-thread handoff entry.
+- Safe preview, enable, disable, and uninstall lifecycle commands for Context Handoff.
+
+### Compatibility
+
+- Core-only behavior remains unchanged.
+- Context Handoff is disabled by default.
+
 ## Unreleased
 
 ### Added

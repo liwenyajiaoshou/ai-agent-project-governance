@@ -1,0 +1,15 @@
+# Current State: {{ project_id }}
+
+Derived local view only. It cannot authorize, complete, release, deploy, or mark tests passed.
+
+- Task: {{ task_id }}
+- Status: {{ task_status }}
+- Repository: {{ repository }}
+- Branch / HEAD: {{ branch }} / {{ head }}
+- Worktree: {{ worktree_status }}
+- Verification: {{ verification_status }}
+- Final status: {{ final_status }}
+- Blockers: {{ blockers }}
+- Next gate: {{ next_gate }}
+- Next action: {{ next_action }}
+- Updated: {{ generated_at }}
