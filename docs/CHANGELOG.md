@@ -14,7 +14,16 @@
 
 ## Unreleased
 
+## [1.4.0] - 2026-08-04
+
 ### Added
+
+- Added Phase 1: Workspace Foundation with workspace isolation and baseline snapshotting.
+- Added Phase 2: Runtime & Manifest Foundation with environment bundles and evidence manifests.
+- Added Phase 3: Authorization & Autonomy with side-effect gates and autonomous remediation budgets.
+- Added Phase 4: Context Handoff integration ensuring `extensions/context-handoff` compatibility with the new schemas.
+- Added Phase 5: CI and syntax validations including extension directories and schema compatibilities.
+
 
 - Added a provenance-bound adoption lifecycle foundation: formal Preflight bridging, CAS ProjectState transitions, confirmed-candidate test selection, workspace snapshots, fresh-evidence verification, and non-production closure semantics.
 

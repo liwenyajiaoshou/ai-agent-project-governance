@@ -1,0 +1,39 @@
+{
+  "manifest_id": "wave2_4_final",
+  "task_id": "AGC-V1.4.0-WAVE-2-4",
+  "schema_version": "1.0",
+  "result": "READY_FOR_PHASE_5",
+  "gate_summary": "EFFECTIVE",
+  "changed_paths": [
+    "extensions/context-handoff/context_handoff.py",
+    "extensions/context-handoff/schemas/current_state_snapshot.schema.json",
+    "governance/core/__init__.py",
+    "governance/core/budget.py",
+    "governance/core/gates.py",
+    "governance/evidence/__init__.py",
+    "governance/evidence/manifest.py",
+    "governance/runtime/__init__.py",
+    "governance/runtime/bundle.py",
+    "governance/runtime/environment.py",
+    "tests/unit/context_handoff/__init__.py",
+    "tests/unit/context_handoff/test_integration.py",
+    "tests/unit/core/__init__.py",
+    "tests/unit/core/test_budget.py",
+    "tests/unit/core/test_gates.py",
+    "tests/unit/evidence/__init__.py",
+    "tests/unit/evidence/test_manifest.py",
+    "tests/unit/runtime/__init__.py",
+    "tests/unit/runtime/test_bundle.py",
+    "tests/unit/runtime/test_environment.py"
+  ],
+  "test_commands": [
+    "/usr/bin/python3 -m unittest discover -s tests/unit/runtime",
+    "/usr/bin/python3 -m unittest discover -s tests/unit/evidence",
+    "/usr/bin/python3 -m unittest discover -s tests/unit/core",
+    "/usr/bin/python3 -m unittest discover -s tests/unit"
+  ],
+  "test_results": ["PASS", "PASS", "PASS", "PASS"],
+  "network_calls": [],
+  "external_writes": [],
+  "created_at": "2026-08-04T11:24:00+08:00"
+}

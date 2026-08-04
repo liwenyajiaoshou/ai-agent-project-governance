@@ -1,0 +1,76 @@
+{
+  "task_id": "AGC-V1.4.0-PHASE-0",
+  "baseline_commit": "c6c24f4ea795c833089f8778e7070d3df0ea81b4",
+  "related_artifact": "reports/AGC_V1_4_0_PHASE_0_REUSE_MATRIX.json",
+  "phases": {
+    "Phase 1 Workspace Foundation": {
+      "dependencies": [],
+      "allowed_scope": ["governance/workspace", "tests/unit/workspace"],
+      "expected_files": [
+        "governance/workspace/baseline.py",
+        "governance/workspace/isolation.py",
+        "governance/workspace/lifecycle.py"
+      ],
+      "required_tests": [
+        "test_workspace_baseline",
+        "test_workspace_isolation"
+      ],
+      "acceptance_gate": "WORKSPACE_BASELINE_READY",
+      "parallelizable": false
+    },
+    "Phase 2 Runtime & Manifest Foundation": {
+      "dependencies": ["Phase 1 Workspace Foundation"],
+      "allowed_scope": ["governance/runtime", "governance/evidence", "tests/unit/runtime", "tests/unit/evidence"],
+      "expected_files": [
+        "governance/runtime/contract.py",
+        "governance/runtime/bundle.py",
+        "governance/evidence/manifest.py"
+      ],
+      "required_tests": [
+        "test_runtime_contract",
+        "test_machine_manifest"
+      ],
+      "acceptance_gate": "RUNTIME_BUNDLE_READY",
+      "parallelizable": false
+    },
+    "Phase 3 Authorization & Autonomy": {
+      "dependencies": ["Phase 2 Runtime & Manifest Foundation"],
+      "allowed_scope": ["governance/core", "tests/unit/core"],
+      "expected_files": [
+        "governance/core/gates.py",
+        "governance/core/budget.py"
+      ],
+      "required_tests": [
+        "test_side_effect_gates",
+        "test_autonomous_budget"
+      ],
+      "acceptance_gate": "SIDE_EFFECT_GATES_READY",
+      "parallelizable": false
+    },
+    "Phase 4 Context Handoff Integration": {
+      "dependencies": ["Phase 3 Authorization & Autonomy"],
+      "allowed_scope": ["extensions/context-handoff", "tests/unit/context-handoff"],
+      "expected_files": [
+        "extensions/context-handoff/context_handoff.py"
+      ],
+      "required_tests": [
+        "test_context_handoff_extension"
+      ],
+      "acceptance_gate": "CONTEXT_HANDOFF_COMPATIBLE",
+      "parallelizable": false
+    },
+    "Phase 5 Final Acceptance": {
+      "dependencies": ["Phase 4 Context Handoff Integration"],
+      "allowed_scope": ["docs", "reports", "scripts"],
+      "expected_files": [
+        "docs/CHANGELOG.md",
+        "scripts/run_governance_ci.py"
+      ],
+      "required_tests": [
+        "run_governance_ci"
+      ],
+      "acceptance_gate": "V1.4.0_PUBLICLY_USABLE",
+      "parallelizable": false
+    }
+  }
+}

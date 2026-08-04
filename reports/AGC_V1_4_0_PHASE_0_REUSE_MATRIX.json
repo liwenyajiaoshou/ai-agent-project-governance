@@ -1,0 +1,88 @@
+{
+  "task_id": "AGC-V1.4.0-PHASE-0",
+  "baseline_commit": "c6c24f4ea795c833089f8778e7070d3df0ea81b4",
+  "related_artifact": "reports/AGC_V1_4_0_PHASE_0_IMPLEMENTATION_TASK_GRAPH.json",
+  "modules": [
+    {
+      "module_id": "M1",
+      "current_capability": "Only ad-hoc workspace state assertions during adoption",
+      "reuse_candidate": "None directly reusable for baseline generation",
+      "missing_contract": "CLEAN/ACCEPTED_DIRTY baseline manifest, User asset list",
+      "expected_change_area": "New Workspace Foundation",
+      "risk_level": "MEDIUM",
+      "recommended_phase": "Phase 1"
+    },
+    {
+      "module_id": "M2",
+      "current_capability": "Preview and explicit confirmation for target project root",
+      "reuse_candidate": "governance/adoption paths",
+      "missing_contract": "Git metadata write permission preflight, naming convention",
+      "expected_change_area": "Workspace Foundation",
+      "risk_level": "HIGH",
+      "recommended_phase": "Phase 1"
+    },
+    {
+      "module_id": "M3",
+      "current_capability": "File generation in reports and .agent_context_handoff",
+      "reuse_candidate": "File IO and exclusive write utilities",
+      "missing_contract": "Asset classification schema, Git inclusion policy",
+      "expected_change_area": "Workspace Foundation",
+      "risk_level": "LOW",
+      "recommended_phase": "Phase 1"
+    },
+    {
+      "module_id": "M4",
+      "current_capability": "No machine execution contract currently",
+      "reuse_candidate": "None",
+      "missing_contract": "OS/Shell, Git state, Runtime dependencies, TUN requirements",
+      "expected_change_area": "Runtime Foundation",
+      "risk_level": "MEDIUM",
+      "recommended_phase": "Phase 2"
+    },
+    {
+      "module_id": "M5",
+      "current_capability": "Runtime Preview Bundle generation in adoption extension",
+      "reuse_candidate": "governance.adoption.compile_runtime_bundle",
+      "missing_contract": "Generic runner identity, external resource bindings",
+      "expected_change_area": "Runtime Foundation",
+      "risk_level": "MEDIUM",
+      "recommended_phase": "Phase 2"
+    },
+    {
+      "module_id": "M6",
+      "current_capability": "Digest checking and c0 scanner in adoption",
+      "reuse_candidate": "governance.adoption.provenance, c0_scanner.py",
+      "missing_contract": "Universal artifact/commit manifest, validation manifest",
+      "expected_change_area": "Evidence Foundation",
+      "risk_level": "LOW",
+      "recommended_phase": "Phase 2"
+    },
+    {
+      "module_id": "M7",
+      "current_capability": "Implicit manual confirmation through rules",
+      "reuse_candidate": "Adoption Approval Candidate logic",
+      "missing_contract": "Formal three-gate state machine (EXTERNAL, WRITE, GIT)",
+      "expected_change_area": "Core Governance",
+      "risk_level": "HIGH",
+      "recommended_phase": "Phase 3"
+    },
+    {
+      "module_id": "M8",
+      "current_capability": "Rules specify fail-closed logic",
+      "reuse_candidate": "None",
+      "missing_contract": "Autonomous remediation boundary definition",
+      "expected_change_area": "Core Governance",
+      "risk_level": "MEDIUM",
+      "recommended_phase": "Phase 3"
+    },
+    {
+      "module_id": "M9",
+      "current_capability": "Context Handoff preview/enable/status",
+      "reuse_candidate": "extensions/context-handoff",
+      "missing_contract": "Reading new state summaries (baseline_id, runtime_bundle_id)",
+      "expected_change_area": "Optional Extensions",
+      "risk_level": "LOW",
+      "recommended_phase": "Phase 4"
+    }
+  ]
+}

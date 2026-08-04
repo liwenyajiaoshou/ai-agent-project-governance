@@ -74,7 +74,7 @@ def build_snapshot(target: Path, project_id: str, task_id: str, evidence: dict[s
         "next_action": str(evidence.get("next_action") or "Provide structured task and verification evidence."), "authoritative_files": authoritative,
         "supersedes": evidence.get("supersedes"), "superseded_by": evidence.get("superseded_by"), "generated_at": str(evidence.get("generated_at") or datetime.now(timezone.utc).isoformat()),
     }
-    for key in ("pr_url", "merge_commit", "release_status", "deployment_status", "external_api_requests", "production_writes", "database_writes"):
+    for key in ("pr_url", "merge_commit", "release_status", "deployment_status", "external_api_requests", "production_writes", "database_writes", "workspace_baseline_id", "environment_id", "runtime_bundle_id", "machine_manifest_id", "side_effect_gate_summary", "autonomous_budget_summary"):
         if key in evidence:
             snapshot[key] = evidence[key]
     return snapshot
@@ -97,6 +97,12 @@ def _render(name: str, values: dict[str, Any]) -> str:
         normalized["authoritative_files"] = "\n".join(f"- {path}" for path in values["authoritative_files"]) or "- UNKNOWN"
     for key, value in normalized.items():
         text = text.replace("{{ " + key + " }}", str(value))
+
+    optional_fields = ["workspace_baseline_id", "environment_id", "runtime_bundle_id", "machine_manifest_id", "side_effect_gate_summary", "autonomous_budget_summary"]
+    extras = [f"- {k}: {normalized[k]}" for k in optional_fields if k in normalized]
+    if extras:
+        text += "\n\n## Governance Identity\n" + "\n".join(extras) + "\n"
+
     return text
 
 

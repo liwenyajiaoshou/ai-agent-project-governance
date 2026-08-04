@@ -1,0 +1,64 @@
+{
+  "manifest_id": "v1_4_0_final",
+  "task_id": "AGC-V1.4.0-PHASE-5",
+  "schema_version": "1.0",
+  "result": "V1_4_0_RC_READY",
+  "gate_summary": "EFFECTIVE",
+  "changed_paths": [
+    "docs/CHANGELOG.md",
+    "scripts/check_python_syntax.py",
+    "reports/AGC_V1_4_0_FINAL_REPORT.md",
+    "reports/AGC_V1_4_0_FINAL_MANIFEST.json",
+    "reports/AGC_V1_4_0_LOCAL_RC_MANIFEST.json"
+  ],
+  "test_commands": [
+    "/usr/bin/python3 scripts/run_governance_ci.py"
+  ],
+  "test_results": [
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 /usr/bin/python3 scripts/run_governance_ci.py",
+      "exit_code": 0,
+      "test_count": 8,
+      "failed_count": 0,
+      "error_count": 0,
+      "skipped_count": 0,
+      "duration_seconds": 40.6
+    }
+  ],
+  "network_calls": [],
+  "external_writes": [],
+  "created_at": "2026-08-04T12:15:00+08:00",
+  "baseline_commit": "c6c24f4ea795c833089f8778e7070d3df0ea81b4",
+  "working_branch": "agc-v1.4.0-phase0",
+  "test_environment": "WSL",
+  "unexecuted_tests": [],
+  "core_only_result": "PASS",
+  "context_handoff_lifecycle": "PASS",
+  "git_status": [
+    "M docs/CHANGELOG.md",
+    " M extensions/context-handoff/context_handoff.py",
+    " M extensions/context-handoff/schemas/current_state_snapshot.schema.json",
+    " M scripts/check_python_syntax.py",
+    "?? governance/core/",
+    "?? governance/evidence/",
+    "?? governance/runtime/",
+    "?? governance/workspace/",
+    "?? reports/AGC_V1_4_0_FINAL_MANIFEST.json",
+    "?? reports/AGC_V1_4_0_FINAL_REPORT.md",
+    "?? reports/AGC_V1_4_0_LOCAL_RC_MANIFEST.json",
+    "?? reports/AGC_V1_4_0_PHASE_0_IMPLEMENTATION_TASK_GRAPH.json",
+    "?? reports/AGC_V1_4_0_PHASE_0_REALITY_CHECK_AND_SCOPE_FREEZE_REPORT.md",
+    "?? reports/AGC_V1_4_0_PHASE_0_REUSE_MATRIX.json",
+    "?? reports/AGC_V1_4_0_PHASE_1_WORKSPACE_FOUNDATION_MANIFEST.json",
+    "?? reports/AGC_V1_4_0_PHASE_1_WORKSPACE_FOUNDATION_REPORT.md",
+    "?? reports/AGC_V1_4_0_WAVE_2_4_IMPLEMENTATION_MANIFEST.json",
+    "?? reports/AGC_V1_4_0_WAVE_2_4_IMPLEMENTATION_REPORT.md",
+    "?? tests/unit/context_handoff/",
+    "?? tests/unit/core/",
+    "?? tests/unit/evidence/",
+    "?? tests/unit/runtime/",
+    "?? tests/unit/workspace/"
+  ],
+  "git_writes": [],
+  "release_actions": []
+}
