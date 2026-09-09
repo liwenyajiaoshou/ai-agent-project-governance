@@ -1,6 +1,9 @@
 """Schema-aligned immutable TaskContract model."""
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
+from datetime import datetime, timezone
+import hashlib
+import json
 from typing import Any, Mapping
 
 
@@ -20,6 +23,7 @@ class TaskContract:
     report: Mapping[str, Any]
     governance: Mapping[str, Any] = field(default_factory=dict)
     scope_contract: Mapping[str, Any] = field(default_factory=dict)
+    supersession: Mapping[str, Any] | None = None
 
     @classmethod
     def from_mapping(cls, value: Mapping[str, Any]) -> "TaskContract":
@@ -34,4 +38,17 @@ class TaskContract:
             result["governance"] = dict(self.governance)
         if self.scope_contract:
             result["scope_contract"] = dict(self.scope_contract)
+        if self.supersession:
+            result["supersession"] = dict(self.supersession)
         return result
+
+
+def supersede(active: TaskContract, successor: TaskContract, approval_evidence: str) -> TaskContract:
+    if active.status != "ACTIVE" or successor.status != "ACTIVE" or not approval_evidence:
+        raise ValueError("TASK_CONTRACT_SUPERSESSION_REQUIRED")
+    digest = lambda item: hashlib.sha256(json.dumps(item.to_mapping(), sort_keys=True, separators=(",", ":")).encode()).hexdigest()
+    return replace(active, status="SUPERSEDED", supersession={
+        "previous_task_id": active.task_id, "previous_task_digest": digest(active),
+        "successor_task_id": successor.task_id, "successor_task_digest": digest(successor),
+        "superseded_at": datetime.now(timezone.utc).isoformat(), "approval_evidence": approval_evidence,
+    })

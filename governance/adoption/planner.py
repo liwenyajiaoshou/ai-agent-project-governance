@@ -342,6 +342,7 @@ def build_plan(
     scope_file: Path | None = None,
     *,
     generation_path: str = "governance.adoption.planner.build_plan",
+    provenance_source_root: Path | None = None,
 ) -> dict[str, object]:
     """Build and schema-validate an untrusted adoption plan using reads only."""
     root = project_root.expanduser().resolve()
@@ -404,6 +405,7 @@ def build_plan(
         plan_payload_digest=value["plan_digest"],
         formal_scope_digests=formal_scope_digests,
         generation_path=generation_path,
+        source_root=provenance_source_root,
     )
 
     validate_mapping(value, "adoption_plan.schema.json")

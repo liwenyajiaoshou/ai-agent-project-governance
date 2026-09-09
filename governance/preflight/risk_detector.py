@@ -16,10 +16,13 @@ class RiskSummary:
 
 def detect_risks(task: TaskRequest, state: ProjectState, code_task: bool) -> RiskSummary:
     text, paths = task.text, task.hints["likely_paths"]
+    structured = task.hints.get("risk_hints", {})
     risks: list[str] = []
-    if task.hints["external_access"] or any(word in text for word in ("real api", "联网", "login", "scrape", "remote call")):
+    no_external = any(phrase in text for phrase in ("no network", "no real api", "do not use api", "不联网", "禁止联网", "不调用真实 api"))
+    no_production = any(phrase in text for phrase in ("do not write production data", "do not write production", "不写生产数据", "不写入生产"))
+    if task.hints["external_access"] or structured.get("external_access") is True or (not no_external and any(word in text for word in ("real api", "联网", "login", "scrape", "remote call"))):
         risks.append("external")
-    if task.hints["production_write"] or any(word in text for word in ("production database", "正式数据库", "production environment", "正式证据库")):
+    if task.hints["production_write"] or structured.get("production_write") is True or (not no_production and any(word in text for word in ("production database", "正式数据库", "production environment", "正式证据库"))):
         risks.append("production")
     if any(word in text for word in ("delete", "overwrite", "clear", "force push", "release", "发布", "删除", "覆盖", "迁移")):
         risks.append("destructive" if "release" not in text and "发布" not in text else "release")

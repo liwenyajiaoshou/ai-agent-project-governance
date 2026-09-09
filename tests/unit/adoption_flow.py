@@ -18,7 +18,7 @@ from governance.adoption.provenance import PUBLIC_GENERATION_PATH
 
 
 ROOT = Path(__file__).resolve().parents[2]
-SCRIPT = ROOT / "scripts" / "agent_adopt.py"
+SCRIPT = ROOT / "tests" / "agent_adopt_test_launcher.py"
 
 
 def run_cli(*args: str) -> None:

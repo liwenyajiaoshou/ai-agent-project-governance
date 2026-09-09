@@ -58,6 +58,11 @@
         },
         "production_write": {
           "type": "boolean"
+        },
+        "task_type": {"enum": ["A", "B", "C"]},
+        "risk_hints": {
+          "type": "object", "additionalProperties": false,
+          "properties": {"external_access": {"type": "boolean"}, "production_write": {"type": "boolean"}}
         }
       }
     },

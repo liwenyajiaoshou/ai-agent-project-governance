@@ -15,7 +15,7 @@ from governance.adoption import build_plan, render_markdown
 
 
 ROOT = Path(__file__).resolve().parents[2]
-SCRIPT = ROOT / "scripts" / "agent_adopt.py"
+SCRIPT = ROOT / "tests" / "agent_adopt_test_launcher.py"
 
 
 def snapshot(root: Path) -> list[tuple[str, str]]:

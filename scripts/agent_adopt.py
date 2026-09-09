@@ -115,7 +115,7 @@ def _output_path(root: Path, output: Path) -> Path:
     raise ValueError("--output must be outside --project-root; target-project writes are forbidden")
 
 
-def _dry_run(args: argparse.Namespace, parser: argparse.ArgumentParser) -> None:
+def _dry_run(args: argparse.Namespace, parser: argparse.ArgumentParser, provenance_source_root: Path | None = None) -> None:
     if not getattr(args, "project_root", None):
         parser.error("dry-run requires --project-root")
     root = args.project_root.expanduser().resolve()
@@ -126,7 +126,7 @@ def _dry_run(args: argparse.Namespace, parser: argparse.ArgumentParser) -> None:
         scope_file = scope_file.expanduser().resolve()
         if not scope_file.is_file():
             raise ValueError(f"--scope-file must be an existing file: {scope_file}")
-    plan = build_plan(root, scope_file=scope_file, generation_path=PUBLIC_GENERATION_PATH)
+    plan = build_plan(root, scope_file=scope_file, generation_path=PUBLIC_GENERATION_PATH, provenance_source_root=provenance_source_root)
     rendered = render_markdown(plan) if getattr(args, "format", "markdown") == "markdown" else render_json(plan)
     if getattr(args, "output", None):
         destination = _output_path(root, args.output)
@@ -216,13 +216,16 @@ HANDLERS = {
 }
 
 
-def main() -> int:
+def main(argv: list[str] | None = None, *, _test_provenance_source_root: Path | None = None) -> int:
     parser = build_parser()
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
     if set(COMMANDS) != set(HANDLERS):  # defensive invariant for future edits
         raise RuntimeError("parser command registry and dispatcher differ")
     try:
-        HANDLERS[args.command](args, parser)
+        if args.command == "dry-run":
+            _dry_run(args, parser, _test_provenance_source_root)
+        else:
+            HANDLERS[args.command](args, parser)
     except (OSError, ValueError) as exc:
         print(f"[ERROR] Adoption command could not complete: {exc}", file=sys.stderr)
         return 3

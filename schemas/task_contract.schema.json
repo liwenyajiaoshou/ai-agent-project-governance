@@ -47,7 +47,8 @@
         "READY",
         "BLOCKED",
         "ACTIVE",
-        "CLOSED"
+        "CLOSED",
+        "SUPERSEDED"
       ]
     },
     "objective": {
@@ -173,6 +174,7 @@
         }
       }
     },
+    "supersession": {"type":"object","additionalProperties":false,"required":["previous_task_id","previous_task_digest","successor_task_id","successor_task_digest","superseded_at","approval_evidence"],"properties":{"previous_task_id":{"type":"string"},"previous_task_digest":{"type":"string"},"successor_task_id":{"type":"string"},"successor_task_digest":{"type":"string"},"superseded_at":{"type":"string","format":"date-time"},"approval_evidence":{"type":"string"}}},
     "governance": {
       "type": "object",
       "additionalProperties": false,

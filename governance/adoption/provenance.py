@@ -37,8 +37,8 @@ def canonical_digest(value: Mapping[str, Any], *, omit: tuple[str, ...] = ()) ->
     return hashlib.sha256(raw).hexdigest()
 
 
-def framework_version() -> str:
-    return (SOURCE_ROOT / "VERSION").read_text(encoding="utf-8").strip()
+def framework_version(source_root: Path | None = None) -> str:
+    return ((source_root or SOURCE_ROOT) / "VERSION").read_text(encoding="utf-8").strip()
 
 
 def _run_git(root: Path, *args: str, input_data: bytes | None = None) -> subprocess.CompletedProcess[bytes]:
@@ -210,16 +210,17 @@ def git_metadata(root: Path) -> dict[str, str]:
 
 def build_provenance_receipt(
     *, target_identity: Mapping[str, Any], target_root: Path, plan_payload_digest: str,
-    formal_scope_digests: Mapping[str, str] | None, generation_path: str,
+    formal_scope_digests: Mapping[str, str] | None, generation_path: str, source_root: Path | None = None,
 ) -> dict[str, Any]:
+    trusted_root = source_root or SOURCE_ROOT
     target_git = git_metadata(target_root)
-    framework_git = git_metadata(SOURCE_ROOT)
-    source_digest = generator_source_digest()
+    framework_git = git_metadata(trusted_root)
+    source_digest = generator_source_digest(root=trusted_root)
     receipt: dict[str, Any] = {
         "schema_version": "1.0",
         "binding_type": "TOOLCHAIN_PROVENANCE_BINDING",
         "generator_id": "ai-agent-project-governance-planner",
-        "generator_version": framework_version(),
+        "generator_version": framework_version(trusted_root),
         "generator_source_digest": source_digest,
         "generator_source_basis": GENERATOR_SOURCE_BASIS,
         "generator_source_contract_version": GENERATOR_SOURCE_CONTRACT_VERSION,

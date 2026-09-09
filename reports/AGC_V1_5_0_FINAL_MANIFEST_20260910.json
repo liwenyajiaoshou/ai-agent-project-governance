@@ -1,0 +1,14 @@
+{
+  "task_id": "AGC-V1.5.0",
+  "baseline_head": "6cedc70629930fcb95aabbf829ede7a708967791",
+  "final_changed_paths": ["VERSION", "governance/adoption/planner.py", "governance/adoption/provenance.py", "governance/models/task_contract.py", "governance/preflight/risk_detector.py", "governance/preflight/task_classifier.py", "governance/verification/test_planner.py", "governance/verification/verification_builder.py", "schemas/task_contract.schema.json", "schemas/task_request.schema.json", "schemas/verification_result.schema.json", "scripts/agent_adopt.py", "tests/__init__.py", "tests/unit/adoption_flow.py", "tests/unit/test_agent_adopt.py", "tests/agent_adopt_test_launcher.py", "tests/unit/test_v1_5_reality_check.py", "reports/AGC_V1_5_0_REALITY_CHECK_AND_IMPLEMENTATION_REPORT_20260910.md", "reports/AGC_V1_5_0_REUSE_MATRIX_20260910.json", "reports/AGC_V1_5_0_FINAL_MANIFEST_20260910.json"],
+  "task_created_changes": true,
+  "unexplained_workspace_changes": [],
+  "canonical_gate": {"command": "PYTHONDONTWRITEBYTECODE=1 python3 scripts/run_governance_ci.py 2>&1 | tee /tmp/agc_v1_5_0_canonical_gate.log", "interpreter": "/usr/bin/python3", "working_directory": "/home/liyouran1997/projects/agc-v1.5.0-development", "exit_code": 0, "result": "PASS", "gates": "8/8 PASS", "log": "/tmp/agc_v1_5_0_canonical_gate.log"},
+  "git_diff_check": "PASS",
+  "network_calls": "none",
+  "production_business_writes": "none",
+  "git_publication": "none",
+  "closure_state": "AGC_V1_5_0_LOCAL_CLOSURE_PASS",
+  "next_allowed_action": "READY_FOR_OWNER_GIT_RELEASE_DECISION"
+}
