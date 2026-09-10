@@ -50,7 +50,7 @@ def task_contract() -> dict:
 def verification_result() -> dict:
     return {
         "schema_version": "1.0", "task_id": "TASK-001", "scope_check": "PASS", "forbidden_operation_check": "PASS",
-        "tests": [{"command": "python -m unittest", "level": 1, "status": "PASS", "summary": "1 passed"}],
+        "tests": [{"command_id": "python-unittest-discover", "level": 1, "required": True, "status": "PASS", "summary": "1 passed", "exit_code": 0, "duration_ms": 1, "stdout_digest": None, "stderr_digest": None, "redaction_count": 0, "redaction_rule_version": "1.0"}],
         "completion_status": "VERIFIED", "remaining_risks": [],
     }
 

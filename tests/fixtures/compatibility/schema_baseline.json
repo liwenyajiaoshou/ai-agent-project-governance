@@ -693,10 +693,10 @@
       "remaining_risks"
     ],
     "enums": {
-      "/properties/scope_check": [
-        "PASS",
-        "FAIL",
-        "NOT_RUN"
+    "/properties/scope_check": [
+      "PASS",
+      "FAIL",
+      "NOT_RUN"
       ],
       "/properties/forbidden_operation_check": [
         "PASS",
@@ -708,10 +708,12 @@
         2,
         3
       ],
-      "/properties/tests/items/properties/status": [
-        "PASS",
-        "FAIL",
-        "NOT_RUN"
+    "/properties/tests/items/properties/status": [
+      "PASS",
+      "FAIL",
+      "NOT_RUN",
+      "TIMEOUT",
+      "ERROR"
       ],
       "/properties/completion_status": [
         "VERIFIED",
@@ -736,7 +738,7 @@
       "/properties/task_id": "string",
       "/properties/tests": "array",
       "/properties/tests/items": "object",
-      "/properties/tests/items/properties/command": "string",
+      "/properties/tests/items/properties/command_id": "string",
       "/properties/tests/items/properties/summary": "string",
       "/properties/remaining_risks": "array",
       "/properties/remaining_risks/items": "string",

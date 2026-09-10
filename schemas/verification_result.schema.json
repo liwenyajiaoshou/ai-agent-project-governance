@@ -41,14 +41,9 @@
       "items": {
         "type": "object",
         "additionalProperties": false,
-        "required": [
-          "command",
-          "level",
-          "status",
-          "summary"
-        ],
+        "required": ["command_id", "level", "required", "status", "summary", "exit_code", "duration_ms", "stdout_digest", "stderr_digest", "redaction_count", "redaction_rule_version"],
         "properties": {
-          "command": {
+          "command_id": {
             "type": "string",
             "minLength": 1
           },
@@ -63,12 +58,21 @@
             "enum": [
               "PASS",
               "FAIL",
-              "NOT_RUN"
+              "NOT_RUN",
+              "TIMEOUT",
+              "ERROR"
             ]
           },
+          "required": {"type": "boolean"},
           "summary": {
             "type": "string"
-          }
+          },
+          "exit_code": {"type": ["integer", "null"]},
+          "duration_ms": {"type": "integer", "minimum": 0},
+          "stdout_digest": {"type": ["string", "null"]},
+          "stderr_digest": {"type": ["string", "null"]},
+          "redaction_count": {"type": "integer", "minimum": 0},
+          "redaction_rule_version": {"type": "string", "minLength": 1}
         }
       }
     },

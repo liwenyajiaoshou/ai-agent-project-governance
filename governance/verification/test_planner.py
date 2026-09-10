@@ -24,14 +24,30 @@ def adapter_command_ids(repo_root: Path, adapter_ids: tuple[str, ...]) -> tuple[
     return tuple(selected)
 
 
-def create(contract, guard, repo_root: Path | None = None, adapter_ids: tuple[str, ...] = (), task_relevant_command_ids: tuple[str, ...] = ()):
+def authorized_command_ids(contract) -> tuple[str, ...]:
+    """Resolve existing TaskContract verification authority to registry IDs."""
+    verification = contract.get("verification", {})
+    authorized = {
+        value
+        for level in ("level_1", "level_2", "level_3")
+        for value in verification.get(level, ())
+        if isinstance(value, str)
+    }
+    resolved = []
+    for command_id, spec in COMMANDS.items():
+        if command_id in authorized or " ".join(spec["argv"]) in authorized:
+            resolved.append(command_id)
+    return tuple(resolved)
+
+
+def create(contract, guard, repo_root: Path | None = None, adapter_ids: tuple[str, ...] = ()):
     if guard["status"] in {"BLOCKED", "ERROR"}:
         return {"schema_version":"1.0","task_id":contract["task_id"],"plan_id":"blocked","levels":[],"selected_commands":[],"required_tests":[],"regression_tests":[],"informational_tests":[],"skipped_levels":[1,2,3],"selection_reasons":["guard_blocked"],"requires_approval":False,"status":"BLOCKED","created_at":datetime.now(timezone.utc).isoformat()}
     level={"A":1,"B":2,"C":3}[contract["task_level"]]
     selected = [name for name, spec in COMMANDS.items() if name in {"unit_tests", "governance_validate", "quality_gate"} and spec["level"] <= level]
     if repo_root is not None:
         selected.extend(name for name in adapter_command_ids(repo_root, adapter_ids) if COMMANDS[name]["level"] <= level and name not in selected)
-    relevant=set(task_relevant_command_ids); commands=[]
+    relevant = set(authorized_command_ids(contract)); commands=[]
     for name in selected:
         category="required" if name in relevant else "regression"
         commands.append({"command_id":name,"level":COMMANDS[name]["level"],"argv":COMMANDS[name]["argv"],"working_directory":COMMANDS[name]["cwd"],"timeout_seconds":COMMANDS[name]["timeout"],"required":category=="required","reason":"task_relevant" if category=="required" else "affected_module_regression"})
