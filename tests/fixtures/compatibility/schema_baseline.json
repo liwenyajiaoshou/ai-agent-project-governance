@@ -313,9 +313,10 @@
       "allowed_changes",
       "conditional_changes",
       "denied_changes",
-      "unmatched_changes",
-      "approval_status",
-      "state_status",
+    "unmatched_changes",
+    "approval_status",
+    "effect_authorization",
+    "state_status",
       "forbidden_operation_status",
       "reasons",
       "run_at"

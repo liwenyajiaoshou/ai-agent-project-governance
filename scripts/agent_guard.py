@@ -7,7 +7,7 @@ from governance.guards.git_status import changed_paths
 from governance.guards.scope_guard import check as scope_check
 from governance.guards.forbidden_operation_guard import check as forbidden_check
 from governance.guards.state_guard import check as state_check
-from governance.guards.approval_guard import check as approval_check, required
+from governance.guards.approval_guard import effect_authorization
 from governance.guards.result_builder import build as result_build
 from governance.schema_loader import validate_mapping
 from governance.serialization import dump_mapping
@@ -17,10 +17,10 @@ try:
  state_status,reasons=state_check()
  if state_status != "OK": raise RuntimeError("state invalid")
  contract=store.active(); paths=changed_paths(repo); fingerprint=build(repo,contract["task_id"],contract)
- approval=approval_check(required(contract),fingerprint,contract["task_id"])
+ authorization=effect_authorization(contract,fingerprint); approval=authorization["status"]
  forbidden,why=forbidden_check(contract,paths); reasons+=why
  groups=scope_check(contract,paths)
- result=result_build(contract,repo,git(repo,["branch","--show-current"]),git(repo,["rev-parse","HEAD"]),paths,groups,approval,state_status,forbidden,reasons)
+ result=result_build(contract,repo,git(repo,["branch","--show-current"]),git(repo,["rev-parse","HEAD"]),paths,groups,approval,state_status,forbidden,reasons,authorization)
  validate_mapping(result,"guard_result.schema.json")
  store.save_p3(layout.LAST_GUARD, result, "guard_result.schema.json")
  output=dump_mapping(result,"yaml")

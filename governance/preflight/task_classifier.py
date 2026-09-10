@@ -19,8 +19,6 @@ def classify_task(task: TaskRequest) -> Classification:
     if declared_type in {"A", "B", "C"}:
         return Classification(declared_type, (f"CLASS-{declared_type}-STRUCTURED",), ("structured task type",))
     matched = [rule for key, rule in C_RULES.items() if key in text]
-    if task.hints["external_access"] or task.hints["production_write"]:
-        matched.append("CLASS-C-HIGH-RISK")
     if matched:
         return Classification("C", tuple(sorted(set(matched))), ("explicit major-work trigger",))
     small = [rule for key, rule in A_RULES.items() if key in text]

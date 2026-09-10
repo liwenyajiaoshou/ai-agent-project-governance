@@ -40,6 +40,6 @@ def run_preflight(task_value: Mapping[str, Any], state_value: Mapping[str, Any])
     scope = resolve_scope(task, state, gate.status, code_task)
     context = task.governance_context
     level = governance_level(context, risks.kinds)
-    contract_value = build_contract(task, state.project_mode, classification.task_level, gate, scope, level, confirmation_requirement(level))
+    contract_value = build_contract(task, state.project_mode, classification.task_level, gate, scope, level, confirmation_requirement(level), risks.kinds)
     validate_mapping(contract_value, "task_contract.schema.json")
     return PreflightResult(TaskContract.from_mapping(contract_value), classification, risks, {"READY": 0, "DRAFT": 2, "BLOCKED": 3}[gate.status])

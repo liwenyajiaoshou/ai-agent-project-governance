@@ -1,8 +1,13 @@
 from __future__ import annotations
+import hashlib
+import json
 import yaml
 from ..schema_loader import validate_mapping
 from . import layout
 from .atomic_writer import write
+
+def digest(value):
+    return hashlib.sha256(json.dumps(value, sort_keys=True, separators=(",", ":")).encode("utf-8")).hexdigest()
 
 def load():
     if not layout.APPROVALS.exists(): return []

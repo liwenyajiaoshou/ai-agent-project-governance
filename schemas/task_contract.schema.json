@@ -191,6 +191,16 @@
             "LEVEL_3_HIGH_RISK"
           ]
         },
+        "task_type": {
+          "enum": ["A", "B", "C"]
+        },
+        "risk_kinds": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {"enum": ["external", "production", "destructive", "release", "secret", "scope", "unknown"]}
+        },
+        "effect_type": {"enum": ["external_access", "formal_data_write", "git_write", "unmapped"]},
+        "effect_scope": {"type": "object", "additionalProperties": true},
         "confirmation_fields": {
           "type": "array",
           "items": {

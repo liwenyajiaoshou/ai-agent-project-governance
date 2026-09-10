@@ -63,7 +63,9 @@
         "risk_hints": {
           "type": "object", "additionalProperties": false,
           "properties": {"external_access": {"type": "boolean"}, "production_write": {"type": "boolean"}}
-        }
+        },
+        "effect_type": {"enum": ["external_access", "formal_data_write", "git_write"]},
+        "effect_scope": {"type": "object", "additionalProperties": true}
       }
     },
     "governance_context": {

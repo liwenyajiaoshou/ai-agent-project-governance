@@ -12,4 +12,4 @@ class P2AcceptanceMatrix(unittest.TestCase):
  def test_four_statuses(self):
   d,r=self.setup(); self.assertEqual(0,self.guard(r).returncode); (r/'tests').mkdir();(r/'tests/a.py').write_text('x');self.assertEqual(2,self.guard(r).returncode);(r/'data/production').mkdir(parents=True);(r/'data/production/a').write_text('x');self.assertEqual(3,self.guard(r).returncode);(r/'.agent_state/active_task.yaml').unlink();self.assertEqual(1,self.guard(r).returncode);d.cleanup()
  def test_missing_approval_blocks(self):
-  d,r=self.setup(); c=dict(CONTRACT);c['objective']=['Call API'];(r/'.agent_state/active_task.yaml').write_text(yaml.safe_dump(c));self.assertEqual(3,self.guard(r).returncode);d.cleanup()
+  d,r=self.setup(); c=dict(CONTRACT);c['objective']=['Call API'];c['governance']={'effect_type':'external_access','effect_scope':{}};(r/'.agent_state/active_task.yaml').write_text(yaml.safe_dump(c));self.assertEqual(3,self.guard(r).returncode);d.cleanup()
