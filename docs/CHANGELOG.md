@@ -14,6 +14,14 @@
 
 ## Unreleased
 
+## [1.5.1] - 2026-09-10
+
+### Changed
+
+- Finalized TestPlan runtime/schema/public-persistence parity and VerificationResult canonical normalization/schema parity.
+- Added compact task-relevant Closure evidence; separated `task_type`, `risk_kinds`, and `governance_level`; wired the ordinary Owner Gate / SideEffectGate and Closure Window / Autonomous Repair Boundary.
+- Corrected C05 requirement definition: no ordinary TaskContract stage model was added.
+
 ## [1.4.0] - 2026-08-04
 
 ### Added

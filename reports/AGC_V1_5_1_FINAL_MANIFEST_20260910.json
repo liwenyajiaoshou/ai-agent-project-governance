@@ -1,0 +1,92 @@
+{
+  "schema_version": "1.0",
+  "release_identity": "v1.5.1-local-release-candidate",
+  "baseline": {
+    "version": "v1.5.0",
+    "commit": "efd8f51503e71fb5b426e565433da0368390fbe3"
+  },
+  "current_branch": "agc-v1.5.1-p0-contract-closure",
+  "identity_head_before_manifest": "d0854074e01b4ffa80ae7ef8816d17925f82fcfd",
+  "batch_checkpoints": {
+    "batch_1": "c825e562ba91cbe5dbaff4f4c9d9eed68de9904c",
+    "batch_2": "56e18d6900f7359e6475d146a5ff089d14eded89",
+    "batch_3": "46daddb3703df75c079df673b6c24e765d48175a",
+    "batch_4": "98ad95c3c014a6bd5f5148da99d05708a96820f8"
+  },
+  "requirement_disposition": {
+    "C01": "COMPLETE",
+    "C02": "COMPLETE",
+    "C05": "REQUIREMENT_DEFINITION_CORRECTED_NO_IMPLEMENTATION_REQUIRED",
+    "C06": "COMPLETE",
+    "C09": "COMPLETE",
+    "C15": "COMPLETE",
+    "C16": "COMPLETE"
+  },
+  "final_changed_paths": [
+    "VERSION",
+    "docs/CHANGELOG.md",
+    "governance/guards/approval_guard.py",
+    "governance/guards/result_builder.py",
+    "governance/policy/execution_envelope.py",
+    "governance/preflight/contract_builder.py",
+    "governance/preflight/engine.py",
+    "governance/preflight/task_classifier.py",
+    "governance/state/approval_store.py",
+    "governance/state/freshness.py",
+    "governance/verification/closure_evaluator.py",
+    "governance/verification/evidence.py",
+    "governance/verification/repair_boundary.py",
+    "governance/verification/test_planner.py",
+    "governance/verification/verification_builder.py",
+    "reports/AGC_V1_5_1_BATCH1_C01_C02_CONTRACT_PARITY_REPORT_20260910.md",
+    "reports/AGC_V1_5_1_BATCH2_C09_COMPACT_CLOSURE_EVIDENCE_REPORT_20260910.md",
+    "reports/AGC_V1_5_1_BATCH3_C16_C15_SEMANTIC_AND_OWNER_GATE_REPORT_20260910.md",
+    "reports/AGC_V1_5_1_BATCH4_C06_CLOSURE_WINDOW_BOUNDARY_REPORT_20260910.md",
+    "reports/AGC_V1_5_1_FINAL_REQUIREMENT_COVERAGE_AND_CLOSURE_20260910.md",
+    "reports/AGC_V1_5_1_FINAL_MANIFEST_20260910.json",
+    "reports/AGC_V1_5_1_P0_REALITY_CHECK_AND_MINIMAL_REPAIR_PLAN_20260910.md",
+    "schemas/closure_result.schema.json",
+    "schemas/guard_result.schema.json",
+    "schemas/task_contract.schema.json",
+    "schemas/task_request.schema.json",
+    "schemas/test_plan.schema.json",
+    "schemas/verification_result.schema.json",
+    "scripts/agent_approve.py",
+    "scripts/agent_close.py",
+    "scripts/agent_guard.py",
+    "tests/fixtures/compatibility/schema_baseline.json",
+    "tests/integration/test_agent_guard_persistence.py",
+    "tests/integration/test_p2_acceptance_matrix.py",
+    "tests/unit/test_schema_contracts.py",
+    "tests/unit/test_v1_5_1_compact_closure_evidence.py",
+    "tests/unit/test_v1_5_1_contract_parity.py",
+    "tests/unit/test_v1_5_1_owner_gate.py",
+    "tests/unit/test_v1_5_1_repair_boundary.py",
+    "tests/unit/test_v1_5_1_semantic_axes.py"
+  ],
+  "targeted_affected_tests": [
+    "tests/unit/test_v1_5_1_contract_parity.py",
+    "tests/unit/test_v1_5_1_compact_closure_evidence.py",
+    "tests/unit/test_v1_5_1_semantic_axes.py",
+    "tests/unit/test_v1_5_1_owner_gate.py",
+    "tests/unit/test_v1_5_1_repair_boundary.py",
+    "tests/integration/test_p2_acceptance_matrix.py",
+    "tests/integration/test_p3_acceptance_matrix.py",
+    "tests/integration/test_p3_closure_cli.py",
+    "tests/integration/test_agent_guard_persistence.py"
+  ],
+  "verification": {
+    "schema_compatibility": "PASS (39 schemas, stable fields and enums)",
+    "governance_validation": "PASS (39 schemas, rules index, module registry, references)",
+    "canonical_governance_gate": "PASS (8/8 gates, exit code 0)",
+    "git_diff_check": "PASS"
+  },
+  "scope_attribution": "Only v1.5.1 P0 functional-candidate paths plus VERSION, minimal CHANGELOG, final manifest, and final-report identity synchronization.",
+  "forbidden_scope_confirmation": {
+    "P1_P2": "NOT_INCLUDED",
+    "new_governance_functionality": "NOT_INCLUDED",
+    "TaskContract_stage_model": "NOT_INCLUDED",
+    "push_tag_release": "NOT_PERFORMED",
+    "merge_rebase_reset_clean_force": "NOT_PERFORMED"
+  }
+}

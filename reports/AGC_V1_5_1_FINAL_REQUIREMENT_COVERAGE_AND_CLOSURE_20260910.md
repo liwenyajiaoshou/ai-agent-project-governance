@@ -45,4 +45,4 @@ The first canonical attempt was blocked only by the read-only test sandbox's ina
 
 `AGC_V1_5_1_LOCAL_CLOSURE_PASS`
 
-The worktree is locally closed at the confirmed scope. `VERSION` remains `1.5.0`; a version bump, tag, push, and release remain outside this authorization and require a separate owner decision.
+The functional candidate is frozen as the `1.5.1` local release candidate. The final identity manifest is `reports/AGC_V1_5_1_FINAL_MANIFEST_20260910.json`. Tag, push, and release remain outside this authorization and require a separate owner decision.
