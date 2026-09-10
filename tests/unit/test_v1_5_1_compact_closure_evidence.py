@@ -69,7 +69,7 @@ class CompactClosureEvidenceTest(unittest.TestCase):
             root = Path(temp); state = root / ".agent_state"; state.mkdir()
             active = contract(); plan = create(active, {"status": "PASS"})
             (state / "active_task.yaml").write_text(yaml.safe_dump(active), encoding="utf-8")
-            (state / "last_guard_result.yaml").write_text(yaml.safe_dump({"status": "PASS"}), encoding="utf-8")
+            (state / "last_guard_result.yaml").write_text(yaml.safe_dump({"status": "PASS", "head_commit": "baseline", "approval_status": "not_required"}), encoding="utf-8")
             (state / "test_plan.yaml").write_text(yaml.safe_dump(plan), encoding="utf-8")
             (state / "test_results.yaml").write_text(yaml.safe_dump([result("governance_validate", "PASS", True), result("quality_gate", "PASS", False)]), encoding="utf-8")
             verify = subprocess.run([sys.executable, str(ROOT / "scripts/agent_verify.py")], cwd=root, text=True, capture_output=True)

@@ -19,6 +19,9 @@ RECOVERABLE_ACTIONS = frozenset({
     "local_dependency",
     "test_network_isolation",
     "test_extension",
+    "mock",
+    "schema_fix",
+    "report_correction",
 })
 
 HARD_ACTIONS = frozenset({
