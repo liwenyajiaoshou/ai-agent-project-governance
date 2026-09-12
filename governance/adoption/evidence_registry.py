@@ -54,6 +54,32 @@ def validate_evidence_file(
     if not path.is_file() or path.is_symlink():
         raise ValueError("lifecycle evidence file is missing or unsafe")
     value = load_mapping(path)
+    validate_evidence_content(
+        value,
+        previous_stage=previous_stage,
+        next_stage=next_stage,
+        target_identity_digest=target_identity_digest,
+        previous_state_digest=previous_state_digest,
+        expected_upstream=expected_upstream,
+    )
+    return value, file_digest(path)
+
+
+def validate_evidence_content(
+    value: Mapping[str, Any],
+    *,
+    previous_stage: str,
+    next_stage: str,
+    target_identity_digest: str,
+    previous_state_digest: str,
+    expected_upstream: list[str],
+) -> None:
+    """Validate lifecycle meaning for already supplied evidence content.
+
+    This is intentionally transport-agnostic.  Callers still own safe file
+    handling or verified reference resolution; this registry remains the sole
+    owner of lifecycle edge requirements.
+    """
     validate_mapping(value, "adoption_lifecycle_evidence.schema.json")
     required_type, required_status = required_for(previous_stage, next_stage)
     if value["evidence_type"] != required_type or value["status"] != required_status:
@@ -64,4 +90,3 @@ def validate_evidence_file(
         raise ValueError("lifecycle evidence previous-state digest mismatch")
     if value["upstream_evidence_digests"] != expected_upstream:
         raise ValueError("lifecycle evidence upstream chain mismatch")
-    return value, file_digest(path)
