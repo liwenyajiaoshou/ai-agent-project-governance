@@ -2,6 +2,23 @@ version: "1.0"
 project_name: "Coding Agent Governance"
 
 tasks:
+  - task_id: "AGC-V1.5.2-P0-ADOPTION-RECOVERY"
+    title: "Existing Project Adoption backward-compatible recovery patch"
+    status: "implemented_pending_owner_acceptance"
+    level: "C"
+    owner: "repository owner"
+    scope:
+      include: ["governance/adoption/", "scripts/agent_adopt.py", "governance/cli.py", "schemas/", "tests/unit/test_v1_5_2_p0.py", "docs/EXISTING_PROJECT_ADOPTION.md", "VERSION"]
+      exclude: ["business projects and data", "network and Provider/API", "Git publication", "states other than ACTIVATED_NOT_PREFLIGHTED"]
+    verification:
+      planned:
+        automated_tests: ["targeted adoption unit tests", "affected adoption regression", "schema compatibility", "canonical governance gate"]
+        repeatable_smoke: ["Jingwei read-only compatibility preview", "git diff --check"]
+      completed:
+        automated_tests: ["See .agent-reports/AGC_V1_5_2_P0_EXISTING_PROJECT_ADOPTION_RECOVERY_IMPLEMENTATION_REPORT_V1_20260912.md"]
+        repeatable_smoke: ["See implementation report"]
+    notes: "No commit, push, tag, release, network request, Provider/API call, business-data write, or Jingwei Runtime recovery was authorized."
+
   - task_id: "AGC-V1.3.0-CONTEXT-HANDOFF-RELEASE"
     title: "Publish optional Context Handoff 0.1.0"
     status: "completed"

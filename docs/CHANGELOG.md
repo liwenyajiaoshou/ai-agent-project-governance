@@ -14,6 +14,14 @@
 
 ## Unreleased
 
+### Added
+
+- Added the v1.5.2 Existing Project Adoption recovery patch: lifecycle viability checks before compile/install/activation, exact approved recovery for `ACTIVATED_NOT_PREFLIGHTED`, a canonical adoption-preflight command, and a bounded changed-only `v1.5.1 → v1.5.2` framework upgrade.
+
+### Security
+
+- Recovery and upgrade remain local-only, approval-bound, digest-bound, state-limited, and fail closed on drift; neither path authorizes business-data writes, network access, Git writes, or release operations.
+
 ## [1.5.1] - 2026-09-10
 
 ### Changed

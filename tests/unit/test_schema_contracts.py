@@ -60,7 +60,7 @@ class SchemaContractsTest(unittest.TestCase):
         return Draft202012Validator(SCHEMAS[name])
 
     def test_all_schemas_are_self_valid_and_identified(self) -> None:
-        self.assertEqual(39, len(SCHEMAS))
+        self.assertEqual(43, len(SCHEMAS))
         ids = set()
         for schema in SCHEMAS.values():
             Draft202012Validator.check_schema(schema)
@@ -68,7 +68,7 @@ class SchemaContractsTest(unittest.TestCase):
             self.assertFalse(schema["additionalProperties"])
             self.assertTrue({"$schema", "$id", "title", "description"}.issubset(schema))
             ids.add(schema["$id"])
-        self.assertEqual(39, len(ids))
+        self.assertEqual(43, len(ids))
 
     def test_minimum_valid_examples(self) -> None:
         examples = {

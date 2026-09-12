@@ -30,7 +30,10 @@ def main() -> int:
             raise InputError(f"Output exists; use --force to overwrite: {args.output_file}")
         if args.output_file and args.output_file.resolve() in {args.task_file.resolve(), args.project_state_file.resolve()}:
             raise InputError("Output file must not overwrite an input file")
-        result = run_preflight(load_mapping(args.task_file), load_mapping(args.project_state_file))
+        task_value, state_value = load_mapping(args.task_file), load_mapping(args.project_state_file)
+        if "objective" in task_value and state_value.get("lifecycle_stage") in {"ACTIVATED_NOT_PREFLIGHTED", "PREFLIGHT_PASSED", "GUARDED", "TEST_PLANNED", "TEST_EXECUTED", "VERIFIED", "CLOSED"}:
+            raise InputError("USE_ADOPTION_LIFECYCLE_BRIDGE: run scripts/agent_adopt.py adoption-preflight")
+        result = run_preflight(task_value, state_value)
         output = dump_mapping(result.contract.to_mapping(), normalize_format(args.format, str(args.output_file) if args.output_file else None))
         if args.output_file:
             args.output_file.parent.mkdir(parents=True, exist_ok=True)

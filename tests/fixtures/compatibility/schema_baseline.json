@@ -869,6 +869,22 @@
     "enums": {},
     "types": {}
   },
+  "adoption_recovery_manifest.schema.json": {
+    "required": ["schema_version", "artifact_type", "target_identity_digest", "expected_state", "old_task_digest", "old_state_digest", "successor_task_digest", "successor_task", "scope_delta", "writeset", "installation_receipt_digest", "activation_receipt_digest", "upstream_evidence_digests", "manifest_digest"],
+    "enums": {}, "types": {}
+  },
+  "adoption_recovery_approval.schema.json": {
+    "required": ["schema_version", "approved_by_user", "approved_action", "approved_at", "expires_at", "target_identity_digest", "manifest_digest", "approved_writeset", "approved_scope_delta"],
+    "enums": {}, "types": {}
+  },
+  "framework_upgrade_manifest.schema.json": {
+    "required": ["schema_version", "artifact_type", "from_version", "to_version", "source_commit", "target_identity_digest", "assets", "writeset", "preserved_paths", "manifest_digest"],
+    "enums": {}, "types": {}
+  },
+  "framework_upgrade_approval.schema.json": {
+    "required": ["schema_version", "approved_by_user", "approved_action", "manifest_digest", "target_identity_digest", "approved_writeset"],
+    "enums": {}, "types": {}
+  },
   "release_gate_config.schema.json": {
     "required": ["schema_version", "release_gate"],
     "enums": {},

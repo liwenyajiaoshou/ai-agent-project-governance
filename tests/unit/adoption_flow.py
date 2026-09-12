@@ -34,7 +34,9 @@ def formal_inputs(
     base: Path, target: Path, *, stem: str = "flow", allowed_paths: list[str] | None = None,
     execution_mode: str = "ACTIVE_DEVELOPMENT", confirmed: bool = True,
 ) -> tuple[dict[str, Any], Path, Path, Path]:
-    allowed = ["src/core/**"] if allowed_paths is None else allowed_paths
+    allowed = ["src/core/**"] if allowed_paths is None else list(allowed_paths)
+    if "project_state.yaml" not in allowed:
+        allowed.append("project_state.yaml")
     scope = {
         "task_id": f"CASE001-{stem.upper()}",
         "task_goal": "Verify one reversible governed adoption task.",

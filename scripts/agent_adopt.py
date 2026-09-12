@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import argparse
 import sys
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -15,7 +16,14 @@ from governance.adoption.approval_candidate import approve_install_candidate, bu
 from governance.adoption.exporter import confirmation_candidate  # noqa: E402
 from governance.adoption.io import write_bytes_exclusive, write_json_exclusive, write_text_exclusive, write_yaml_exclusive  # noqa: E402
 from governance.adoption.provenance import PUBLIC_GENERATION_PATH  # noqa: E402
-from governance.schema_loader import load_mapping  # noqa: E402
+from governance.schema_loader import load_mapping, validate_mapping  # noqa: E402
+from governance.adoption.recovery import compile_contract_recovery, recover_approved  # noqa: E402
+from governance.adoption.lifecycle_context import build_lifecycle_context, run_adoption_preflight  # noqa: E402
+from governance.adoption.lifecycle import transition_project_state  # noqa: E402
+from governance.adoption.evidence_registry import upstream_digests  # noqa: E402
+from governance.adoption.runtime_artifact_compiler import digest_bytes  # noqa: E402
+from governance.adoption.installer import digest  # noqa: E402
+from governance.adoption.framework_upgrade import compile_framework_upgrade, install_framework_upgrade  # noqa: E402
 
 
 COMMANDS = {
@@ -28,6 +36,13 @@ COMMANDS = {
     "install-approved": "Install exact approved Runtime artifact bytes without activation.",
     "assess-rollback": "Produce a read-only manual recovery assessment.",
     "rollback-install": "Reject automatic rollback and explain the manual-only boundary.",
+    "compile-contract-recovery": "Compile an exact activated-Runtime recovery candidate.",
+    "approve-contract-recovery": "Record explicit Owner approval for one unchanged recovery candidate.",
+    "recover-approved": "Atomically bind an approved successor TaskContract.",
+    "adoption-preflight": "Run the canonical adoption-aware preflight and lifecycle transition.",
+    "compile-framework-upgrade": "Preview the bounded v1.5.1-to-v1.5.2 changed-only framework upgrade.",
+    "approve-framework-upgrade": "Record explicit Owner approval for one upgrade preview.",
+    "upgrade-approved": "Install one exact approved changed-only framework upgrade.",
 }
 
 
@@ -103,6 +118,32 @@ def build_parser() -> argparse.ArgumentParser:
     rollback.add_argument("--target-project-root", type=Path, required=True)
     rollback.add_argument("--installation-receipt", type=Path, required=True)
     rollback.add_argument("--rollback-approval", type=Path, required=True)
+
+    recovery = subcommands.add_parser("compile-contract-recovery", help=COMMANDS["compile-contract-recovery"])
+    recovery.add_argument("--target-project-root", type=Path, required=True)
+    recovery.add_argument("--successor-task", type=Path, required=True)
+    recovery.add_argument("--installation-receipt", type=Path, required=True); recovery.add_argument("--activation-receipt", type=Path, required=True)
+    recovery.add_argument("--output", type=Path, required=True)
+    recovery_approval = subcommands.add_parser("approve-contract-recovery", help=COMMANDS["approve-contract-recovery"])
+    recovery_approval.add_argument("--candidate", type=Path, required=True)
+    recovery_approval.add_argument("--output", type=Path, required=True)
+    recovery_approval.add_argument("--owner-approved", action="store_true", required=True)
+    recover = subcommands.add_parser("recover-approved", help=COMMANDS["recover-approved"])
+    recover.add_argument("--target-project-root", type=Path, required=True)
+    recover.add_argument("--manifest", type=Path, required=True); recover.add_argument("--approval", type=Path, required=True)
+    recover.add_argument("--installation-receipt", type=Path, required=True); recover.add_argument("--activation-receipt", type=Path, required=True)
+    recover.add_argument("--evidence-output", type=Path, required=True)
+    preflight = subcommands.add_parser("adoption-preflight", help=COMMANDS["adoption-preflight"])
+    for name in ("installation-receipt", "activation-receipt", "runtime-artifact-manifest", "final-install-approval", "activation-approval", "confirmation", "plan"):
+        preflight.add_argument(f"--{name}", type=Path, required=True)
+    preflight.add_argument("--target-project-root", type=Path, required=True)
+    preflight.add_argument("--evidence-output", type=Path, required=True)
+    upgrade = subcommands.add_parser("compile-framework-upgrade", help=COMMANDS["compile-framework-upgrade"])
+    upgrade.add_argument("--source-root", type=Path, required=True); upgrade.add_argument("--target-project-root", type=Path, required=True); upgrade.add_argument("--output", type=Path, required=True)
+    upgrade_approval = subcommands.add_parser("approve-framework-upgrade", help=COMMANDS["approve-framework-upgrade"])
+    upgrade_approval.add_argument("--candidate", type=Path, required=True); upgrade_approval.add_argument("--output", type=Path, required=True); upgrade_approval.add_argument("--owner-approved", action="store_true", required=True)
+    upgrade_install = subcommands.add_parser("upgrade-approved", help=COMMANDS["upgrade-approved"])
+    upgrade_install.add_argument("--source-root", type=Path, required=True); upgrade_install.add_argument("--target-project-root", type=Path, required=True); upgrade_install.add_argument("--manifest", type=Path, required=True); upgrade_install.add_argument("--approval", type=Path, required=True); upgrade_install.add_argument("--receipt-output", type=Path, required=True)
     return parser
 
 
@@ -202,6 +243,41 @@ def _assess_rollback(args: argparse.Namespace, _: argparse.ArgumentParser) -> No
 def _rollback_install(args: argparse.Namespace, _: argparse.ArgumentParser) -> None:
     rollback_install(args.target_project_root, args.installation_receipt, args.rollback_approval)
 
+def _compile_contract_recovery(args: argparse.Namespace, _: argparse.ArgumentParser) -> None:
+    compile_contract_recovery(args.target_project_root, args.successor_task, args.installation_receipt, args.activation_receipt, _output_path(args.target_project_root.resolve(strict=True), args.output))
+
+def _approve_contract_recovery(args: argparse.Namespace, _: argparse.ArgumentParser) -> None:
+    manifest = load_mapping(args.candidate)
+    now = datetime.now(timezone.utc)
+    approval = {"schema_version":"1.0", "approved_by_user":True, "approved_action":"RECOVER_ACTIVATED_TASK_CONTRACT", "approved_at":now.isoformat(), "expires_at":(now + timedelta(hours=1)).isoformat(), "target_identity_digest":manifest["target_identity_digest"], "manifest_digest":manifest["manifest_digest"], "approved_writeset":manifest["writeset"], "approved_scope_delta":manifest["scope_delta"]}
+    validate_mapping(approval, "adoption_recovery_approval.schema.json")
+    write_json_exclusive(args.output, approval)
+
+def _recover_approved(args: argparse.Namespace, _: argparse.ArgumentParser) -> None:
+    recover_approved(args.target_project_root, args.manifest, args.approval, args.installation_receipt, args.activation_receipt, args.evidence_output)
+
+def _adoption_preflight(args: argparse.Namespace, _: argparse.ArgumentParser) -> None:
+    target = args.target_project_root.resolve(strict=True); task, state = target / "task.yaml", target / "project_state.yaml"
+    context = build_lifecycle_context(target, task, state, args.installation_receipt, args.activation_receipt, runtime_artifact_manifest=args.runtime_artifact_manifest, final_install_approval=args.final_install_approval, activation_approval=args.activation_approval, confirmation=args.confirmation, plan=args.plan)
+    result = run_adoption_preflight(context, task, state)
+    state_value = load_mapping(state)
+    evidence = {"schema_version":"1.0", "evidence_type":"PreflightEvidence", "status":"PASS", "target_identity_digest":context.target_identity_digest, "previous_state_digest":digest_bytes(state.read_bytes()), "upstream_evidence_digests":upstream_digests(state_value), "payload":result}
+    write_json_exclusive(args.evidence_output, evidence)
+    transition_project_state(state, expected_current_stage="ACTIVATED_NOT_PREFLIGHTED", expected_current_state_digest=digest_bytes(state.read_bytes()), evidence_path=args.evidence_output, requested_next_stage="PREFLIGHT_PASSED", target_identity_digest=context.target_identity_digest)
+    print("PREFLIGHT_PASSED next_safe_action=agent_guard")
+
+def _compile_framework_upgrade(args: argparse.Namespace, _: argparse.ArgumentParser) -> None:
+    compile_framework_upgrade(args.source_root, args.target_project_root, args.output)
+
+def _approve_framework_upgrade(args: argparse.Namespace, _: argparse.ArgumentParser) -> None:
+    manifest = load_mapping(args.candidate)
+    approval = {"schema_version":"1.0", "approved_by_user":True, "approved_action":"UPGRADE_FRAMEWORK_1_5_1_TO_1_5_2", "manifest_digest":manifest["manifest_digest"], "target_identity_digest":manifest["target_identity_digest"], "approved_writeset":manifest["writeset"]}
+    validate_mapping(approval, "framework_upgrade_approval.schema.json")
+    write_json_exclusive(args.output, approval)
+
+def _upgrade_approved(args: argparse.Namespace, _: argparse.ArgumentParser) -> None:
+    install_framework_upgrade(args.source_root, args.target_project_root, args.manifest, args.approval, args.receipt_output)
+
 
 HANDLERS = {
     "dry-run": _dry_run,
@@ -213,6 +289,13 @@ HANDLERS = {
     "install-approved": _install_approved,
     "assess-rollback": _assess_rollback,
     "rollback-install": _rollback_install,
+    "compile-contract-recovery": _compile_contract_recovery,
+    "approve-contract-recovery": _approve_contract_recovery,
+    "recover-approved": _recover_approved,
+    "adoption-preflight": _adoption_preflight,
+    "compile-framework-upgrade": _compile_framework_upgrade,
+    "approve-framework-upgrade": _approve_framework_upgrade,
+    "upgrade-approved": _upgrade_approved,
 }
 
 

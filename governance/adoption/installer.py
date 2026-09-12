@@ -13,6 +13,7 @@ from governance.adoption.planner import target_identity
 from governance.adoption.runtime_artifact_compiler import MANIFEST_FILENAME, canonical_digest, compiler_identity, digest_bytes
 from governance.adoption.scope_contract import assert_scope_equal, scope_digest
 from governance.adoption.writeset import SIDECAR_FILES, canonical_sidecars, load_and_validate_sidecars
+from governance.adoption.contract_viability import require_adoption_lifecycle_viability
 from governance.models.project_state import ProjectState
 from governance.models.task_contract import TaskContract
 from governance.schema_loader import load_mapping, validate_mapping
@@ -183,6 +184,7 @@ def _validated_install_inputs(target_root: Path, draft_bundle: Path, runtime_art
     validate_mapping(state, "project_state.schema.json")
     TaskContract.from_mapping(task)
     ProjectState.from_mapping(state)
+    require_adoption_lifecycle_viability(task)
     assert_scope_equal(scope, task.get("scope_contract", {}), boundary="installer Runtime task contract")
     return target, draft_manifest, runtime_manifest, contents, approval, sidecars
 

@@ -363,6 +363,8 @@ def build_plan(
     from governance.adoption.writeset import classify_install_paths
     install_classifications = classify_install_paths(manifest, root)
     task_draft, project_state_draft = _scope_bound_drafts(scope_data)
+    from governance.adoption.contract_viability import adoption_lifecycle_viability
+    lifecycle_viability = adoption_lifecycle_viability(task_draft)
 
     target_id = target_identity(root)
 
@@ -384,6 +386,7 @@ def build_plan(
         "task_draft": task_draft,
         "scope_candidates": _scope_candidates(task_draft),
         "project_state_draft": project_state_draft,
+        "adoption_lifecycle_viability": lifecycle_viability,
         "required_confirmations": _confirmations(),
         "blocked_decisions": _blocked_decisions(),
         "next_commands": _next_commands(root, candidates),

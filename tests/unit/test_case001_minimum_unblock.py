@@ -36,7 +36,7 @@ class Case001MinimumUnblockTest(unittest.TestCase):
             "task_id": "CASE001-SCOPE",
             "task_goal": "Verify canonical scope boundaries.",
             "execution_mode": "ACTIVE_DEVELOPMENT",
-            "allowed_paths": ["src/core/**"],
+            "allowed_paths": ["src/core/**", "project_state.yaml"],
             "denied_paths": ["data/**", ".env"],
             "known_safe_commands": ["python -m unittest"],
             "network_policy": "BLOCKED",
@@ -48,7 +48,7 @@ class Case001MinimumUnblockTest(unittest.TestCase):
         return value
 
     def test_active_and_observation_scope_modes_fail_closed(self) -> None:
-        self.assertEqual(["src/core/**"], canonical_scope(self.scope(), source="active")["allowed_paths"])
+        self.assertEqual(["project_state.yaml", "src/core/**"], canonical_scope(self.scope(), source="active")["allowed_paths"])
         with self.assertRaisesRegex(ValueError, "EMPTY_ALLOWED_SCOPE_REQUIRES_EXPLICIT_OBSERVATION_MODE"):
             canonical_scope(self.scope(allowed_paths=[]), source="active empty")
         observation = self.scope(execution_mode="OBSERVATION_ONLY", allowed_paths=[], owner_confirmed_empty_scope=True)

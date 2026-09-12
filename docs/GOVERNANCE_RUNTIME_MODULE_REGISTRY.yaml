@@ -201,10 +201,10 @@ modules:
     layer: adoption_experience
     purpose: Build an untrusted, local-only existing-project adoption plan from adapter and audit evidence.
     status: existing
-    paths: [governance/adoption/, scripts/agent_adopt.py, scripts/agent_state.py, schemas/adoption_plan.schema.json, schemas/adoption_confirmation.schema.json, schemas/adoption_final_approval.schema.json, schemas/adoption_installation_receipt.schema.json, schemas/adoption_rollback_approval.schema.json, schemas/runtime_artifact_manifest.schema.json, schemas/activation_approval.schema.json, schemas/activation_receipt.schema.json]
+    paths: [governance/adoption/, scripts/agent_adopt.py, scripts/agent_state.py, schemas/adoption_plan.schema.json, schemas/adoption_confirmation.schema.json, schemas/adoption_final_approval.schema.json, schemas/adoption_installation_receipt.schema.json, schemas/adoption_rollback_approval.schema.json, schemas/runtime_artifact_manifest.schema.json, schemas/activation_approval.schema.json, schemas/activation_receipt.schema.json, schemas/adoption_recovery_manifest.schema.json, schemas/adoption_recovery_approval.schema.json, schemas/framework_upgrade_manifest.schema.json, schemas/framework_upgrade_approval.schema.json]
     depends_on: [adapter_protocol, adoption_audit, schema_contracts]
     must_not_depend_on: [network, secrets, production_data, governance/state/]
     risk_level: medium
     phase: AGC-UX-04B
     public_entrypoints: [scripts/agent_adopt.py]
-    notes: Owns formal scope validation, truthful toolchain provenance, byte-stable artifact I/O, canonical pre-write manifests, unapproved Preview candidates, and bounded installation. No candidate grants installation or activation authority.
+    notes: Owns formal scope and lifecycle-viability validation, truthful toolchain provenance, byte-stable artifact I/O, canonical pre-write manifests, bounded installation, activated-runtime recovery, adoption-aware preflight, and the fixed v1.5.1-to-v1.5.2 upgrade. No candidate grants installation, activation, recovery, or upgrade authority.

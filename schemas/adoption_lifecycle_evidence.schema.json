@@ -8,7 +8,7 @@
   "required": ["schema_version", "evidence_type", "status", "target_identity_digest", "previous_state_digest", "upstream_evidence_digests", "payload"],
   "properties": {
     "schema_version": {"const": "1.0"},
-    "evidence_type": {"enum": ["PreflightEvidence", "GuardEvidence", "TestPlanEvidence", "TestRunEvidence", "VerificationEvidence", "ClosureEvidence"]},
+    "evidence_type": {"enum": ["RecoveryEvidence", "PreflightEvidence", "GuardEvidence", "TestPlanEvidence", "TestRunEvidence", "VerificationEvidence", "ClosureEvidence"]},
     "status": {"type": "string", "minLength": 1},
     "target_identity_digest": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
     "previous_state_digest": {"type": "string", "pattern": "^[a-f0-9]{64}$"},

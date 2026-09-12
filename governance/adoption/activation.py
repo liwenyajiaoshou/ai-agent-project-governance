@@ -12,6 +12,7 @@ from governance.adoption.installer import digest
 from governance.adoption.io import text_bytes, write_json_exclusive, write_text_atomic
 from governance.adoption.planner import target_identity
 from governance.adoption.runtime_artifact_compiler import MANIFEST_FILENAME, canonical_digest, compiler_identity, digest_bytes
+from governance.adoption.contract_viability import require_adoption_lifecycle_viability
 from governance.adoption.writeset import SIDECAR_FILES, load_and_validate_sidecars
 from governance.models.project_state import ProjectState
 from governance.models.task_contract import TaskContract
@@ -79,6 +80,7 @@ def _validate_inputs(target: Path, task_path: Path, state_path: Path, manifest_p
     task, state = load_mapping(task_path), load_mapping(state_path)
     validate_mapping(task, "task_contract.schema.json"); TaskContract.from_mapping(task)
     validate_mapping(state, "project_state.schema.json"); ProjectState.from_mapping(state)
+    require_adoption_lifecycle_viability(task)
     return manifest, final_approval, installation_receipt, approval, task, state
 
 

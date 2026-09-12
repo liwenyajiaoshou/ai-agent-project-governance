@@ -48,8 +48,15 @@ Note: Artifacts generated before `v1.2.0` do not carry the Git-HEAD-blob provena
 | `install-approved` | Copy exact approved bytes; it does not activate. |
 | `assess-rollback` | Produce a read-only manual recovery assessment. |
 | `rollback-install` | Reject automatic rollback; it never deletes target files. |
+| `compile-contract-recovery` / `approve-contract-recovery` / `recover-approved` | Preview, explicitly approve, then atomically rebind only an `ACTIVATED_NOT_PREFLIGHTED` Runtime. |
+| `adoption-preflight` | Run the canonical adoption-aware bridge and record the `PREFLIGHT_PASSED` transition. |
+| `compile-framework-upgrade` / `approve-framework-upgrade` / `upgrade-approved` | Apply only an exact approved, drift-free `v1.5.1 → v1.5.2` changed-asset writeset. |
 
 All commands are local-only and do not authorize network access, Git writes, production actions, or deployment.
+
+Full lifecycle adoption requires explicit write authority for `project_state.yaml`; the planner diagnoses missing authority and compile, install, and activation reject it with stable reason codes. Generic discovery contracts may remain zero-write because this gate is adoption-specific and never widens scope automatically.
+
+Recovery preserves the installed/activation evidence chain and existing ProjectState history. It never overwrites without a fresh exact Owner approval and its writeset is fixed to `task.yaml` plus `project_state.yaml`. The controlled upgrade similarly excludes those Runtime files and refuses unknown local framework drift. Use generic `agent_preflight.py` only for generic TaskRequest input; an activated adoption TaskContract returns `USE_ADOPTION_LIFECYCLE_BRIDGE`.
 
 ## Export reviewed configuration drafts
 

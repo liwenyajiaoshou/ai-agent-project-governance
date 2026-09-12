@@ -13,6 +13,7 @@ from governance.adoption.io import text_bytes, write_bytes_exclusive, write_json
 from governance.adoption.planner import target_identity
 from governance.adoption.scope_contract import assert_scope_equal, scope_digest, validate_plan_scope
 from governance.adoption.writeset import canonical_sidecars, write_sidecars
+from governance.adoption.contract_viability import require_adoption_lifecycle_viability
 from governance.models.project_state import ProjectState
 from governance.models.task_contract import TaskContract
 from governance.schema_loader import load_mapping, validate_mapping
@@ -48,6 +49,7 @@ def compiler_identity() -> dict[str, str]:
         "governance/adoption/scope_contract.py",
         "governance/adoption/writeset.py",
         "governance/adoption/io.py",
+        "governance/adoption/contract_viability.py",
         "schemas/task_contract.schema.json",
         "schemas/project_state.schema.json",
     )
@@ -130,6 +132,7 @@ def compile_runtime_artifacts(
         raise ValueError("export manifest does not bind the confirmed inputs")
     _require_exact_drafts(plan, confirmation, drafts)
     task, state = _runtime_values(plan, confirmation)
+    require_adoption_lifecycle_viability(task)
     validate_mapping(task, "task_contract.schema.json")
     validate_mapping(state, "project_state.schema.json")
     TaskContract.from_mapping(task)
