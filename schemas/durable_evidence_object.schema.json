@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://vanlew1.github.io/ai-agent-project-governance/schemas/durable_evidence_object.schema.json",
+  "title": "Durable Evidence Object",
+  "description": "Versioned immutable-object metadata. Unknown schema versions are rejected by the Phase 1 boundary.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["object_id", "sha256", "byte_length", "evidence_type", "schema_id", "schema_version", "metadata", "created_at"],
+  "properties": {
+    "object_id": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "byte_length": {"type": "integer", "minimum": 0},
+    "evidence_type": {"type": "string", "minLength": 1},
+    "schema_id": {"type": "string", "minLength": 1},
+    "schema_version": {"const": "1.0"},
+    "metadata": {"type": "object", "additionalProperties": true},
+    "created_at": {"type": "string", "format": "date-time"}
+  }
+}

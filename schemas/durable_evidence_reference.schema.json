@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://vanlew1.github.io/ai-agent-project-governance/schemas/durable_evidence_reference.schema.json",
+  "title": "Durable Evidence Reference",
+  "description": "Versioned lookup binding for an immutable evidence object; it contains no authoritative file path.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["object_id", "sha256", "byte_length", "evidence_type", "schema_id", "schema_version"],
+  "properties": {
+    "object_id": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "byte_length": {"type": "integer", "minimum": 0},
+    "evidence_type": {"type": "string", "minLength": 1},
+    "schema_id": {"type": "string", "minLength": 1},
+    "schema_version": {"const": "1.0"}
+  }
+}
