@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import hashlib
 from pathlib import Path
-from typing import Any, Mapping
+from typing import Any, Callable, Mapping
 
 from governance.schema_loader import load_mapping, validate_mapping
 
@@ -40,6 +40,66 @@ def upstream_digests(state: Mapping[str, Any]) -> list[str]:
                 raise ValueError("previous lifecycle evidence file changed or disappeared")
         digests.append(expected)
     return digests
+
+
+def validate_historical_evidence_chain(
+    state: Mapping[str, Any],
+    *,
+    target_identity_digest: str,
+    resolve_reference: Callable[[Mapping[str, Any], str, str, list[str]], str],
+) -> list[str]:
+    """Validate the ordered prior chain once and return its frozen digests.
+
+    Path-backed records retain the legacy route.  A record without a path is a
+    bounded, request-scoped reference route: its supplied resolver callback
+    must validate that exact record and return its exact byte digest.  This is
+    deliberately not a registry or source-discovery mechanism.
+    """
+    digests: list[str] = []
+    previous_stage = "ACTIVATED_NOT_PREFLIGHTED"
+    for item in state.get("lifecycle_evidence", []):
+        next_stage = item.get("stage")
+        expected = item.get("evidence_file_digest", item.get("evidence_digest"))
+        if not isinstance(expected, str) or item.get("evidence_digest") != expected:
+            raise ValueError("previous lifecycle evidence digest is invalid")
+        is_transition = (
+            isinstance(next_stage, str)
+            and NEXT_STAGE.get(previous_stage) == next_stage
+            and item.get("evidence_type") == required_for(previous_stage, next_stage)[0]
+        )
+        if not is_transition:
+            # Activation/recovery provenance predates the transition registry.
+            # Preserve its baseline digest/path check and do not infer a source.
+            evidence_file = item.get("evidence_file")
+            if evidence_file:
+                path = Path(evidence_file)
+                if not path.is_file() or path.is_symlink() or file_digest(path) != expected:
+                    raise ValueError("previous lifecycle evidence file changed or disappeared")
+            digests.append(expected)
+            continue
+        if item.get("target_identity_digest") != target_identity_digest:
+            raise ValueError("previous lifecycle evidence target identity mismatch")
+        if item.get("previous_state_digest") is None:
+            raise ValueError("previous lifecycle evidence previous-state digest is missing")
+        if item.get("upstream_evidence_digests") != digests:
+            raise ValueError("previous lifecycle evidence upstream chain mismatch")
+        evidence_file = item.get("evidence_file")
+        if evidence_file:
+            _, actual = validate_evidence_file(
+                Path(evidence_file), previous_stage=previous_stage, next_stage=next_stage,
+                target_identity_digest=target_identity_digest,
+                previous_state_digest=item["previous_state_digest"], expected_upstream=digests,
+            )
+        else:
+            actual = resolve_reference(item, previous_stage, next_stage, list(digests))
+        if actual != expected:
+            raise ValueError("previous lifecycle evidence digest changed or mismatched")
+        digests.append(actual)
+        previous_stage = next_stage
+    return digests
+
+
+NEXT_STAGE = {previous: following for (previous, following) in EDGE_REQUIREMENTS}
 
 
 def validate_evidence_file(

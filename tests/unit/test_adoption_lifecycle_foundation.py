@@ -10,8 +10,10 @@ from unittest.mock import patch
 import yaml
 
 from governance.adoption.lifecycle import build_adoption_test_plan, build_guard_evidence, close_adoption, run_adoption_test_plan, transition_project_state, verify_adoption
+from governance.adoption.lifecycle_evidence_adapter import ReferenceEvidence
 from governance.adoption.lifecycle_context import AdoptionLifecycleContext, run_adoption_preflight, snapshot_workspace, task_request_from_contract
 from governance.adoption.installer import digest
+from governance.evidence import EvidenceBinding, EvidenceObject, EvidenceResolver, InMemoryEvidenceStore
 
 
 ROOT = Path("/tmp/agc-adoption-04f-b")
@@ -49,6 +51,14 @@ class LifecycleFoundationTest(unittest.TestCase):
                                     "upstream_evidence_digests":upstream or [], "payload":{}}, sort_keys=True), encoding="utf-8")
         return path
 
+    def reference_evidence(self, *, evidence_type: str, status: str, state_path: Path, upstream: list[str] | None = None) -> ReferenceEvidence:
+        payload = json.dumps({"schema_version":"1.0", "evidence_type":evidence_type, "status":status,
+                              "target_identity_digest":"a" * 64, "previous_state_digest":hashlib.sha256(state_path.read_bytes()).hexdigest(),
+                              "upstream_evidence_digests":upstream or [], "payload":{}}, sort_keys=True).encode()
+        store = InMemoryEvidenceStore()
+        obj = EvidenceObject.from_bytes(payload, evidence_type=evidence_type, schema_id="adoption_lifecycle_evidence.schema.json")
+        return ReferenceEvidence(EvidenceBinding(evidence_type, store.publish(payload, obj)), EvidenceResolver(store))
+
     def test_contract_mapping_preserves_narrow_scope(self) -> None:
         request = task_request_from_contract(contract())
         self.assertEqual(["src/**"], request["hints"]["likely_paths"])
@@ -72,6 +82,45 @@ class LifecycleFoundationTest(unittest.TestCase):
             next_state = transition_project_state(path, expected_current_stage="ACTIVATED_NOT_PREFLIGHTED", expected_current_state_digest=current, evidence_path=evidence, requested_next_stage="PREFLIGHT_PASSED", target_identity_digest="a" * 64)
             self.assertEqual("PREFLIGHT_PASSED", next_state["lifecycle_stage"])
             with self.assertRaises(ValueError): transition_project_state(path, expected_current_stage="PREFLIGHT_PASSED", expected_current_state_digest=hashlib.sha256(path.read_bytes()).hexdigest(), evidence_path=evidence, requested_next_stage="CLOSED", target_identity_digest="a" * 64)
+
+    def test_reference_and_mixed_chain_transitions_are_explicit_and_bounded(self) -> None:
+        with tempfile.TemporaryDirectory(dir=ROOT) as temp:
+            root = Path(temp); path = self.write_state(root)
+            reference = self.reference_evidence(evidence_type="PreflightEvidence", status="PASS", state_path=path)
+            first = transition_project_state(path, expected_current_stage="ACTIVATED_NOT_PREFLIGHTED",
+                expected_current_state_digest=hashlib.sha256(path.read_bytes()).hexdigest(), requested_next_stage="PREFLIGHT_PASSED",
+                target_identity_digest="a" * 64, evidence_source=reference)
+            self.assertNotIn("evidence_file", first["lifecycle_evidence"][-1])
+            legacy = self.evidence(root, evidence_type="GuardEvidence", status="PASS", state_path=path,
+                upstream=[reference.binding.reference.sha256])
+            second = transition_project_state(path, expected_current_stage="PREFLIGHT_PASSED",
+                expected_current_state_digest=hashlib.sha256(path.read_bytes()).hexdigest(), requested_next_stage="GUARDED",
+                target_identity_digest="a" * 64, evidence_path=legacy, prior_reference_evidence=[reference])
+            self.assertEqual([reference.binding.reference.sha256], second["lifecycle_evidence"][-1]["upstream_evidence_digests"])
+            self.assertIn("evidence_file", second["lifecycle_evidence"][-1])
+
+    def test_reference_failures_and_stale_cas_leave_state_unchanged(self) -> None:
+        with tempfile.TemporaryDirectory(dir=ROOT) as temp:
+            path = self.write_state(Path(temp)); before = path.read_bytes()
+            missing_store = InMemoryEvidenceStore()
+            payload = b'{"schema_version":"1.0"}'
+            obj = EvidenceObject.from_bytes(payload, evidence_type="PreflightEvidence", schema_id="adoption_lifecycle_evidence.schema.json")
+            missing = ReferenceEvidence(EvidenceBinding("missing", obj.reference()), EvidenceResolver(missing_store))
+            with self.assertRaises(ValueError):
+                transition_project_state(path, expected_current_stage="ACTIVATED_NOT_PREFLIGHTED", expected_current_state_digest=hashlib.sha256(before).hexdigest(), requested_next_stage="PREFLIGHT_PASSED", target_identity_digest="a" * 64, evidence_source=missing)
+            self.assertEqual(before, path.read_bytes())
+            with self.assertRaises(ValueError):
+                transition_project_state(path, expected_current_stage="ACTIVATED_NOT_PREFLIGHTED", expected_current_state_digest="0" * 64, requested_next_stage="PREFLIGHT_PASSED", target_identity_digest="a" * 64, evidence_source=missing)
+            self.assertEqual(before, path.read_bytes())
+
+    def test_extra_or_ambiguous_sources_fail_without_mutation(self) -> None:
+        with tempfile.TemporaryDirectory(dir=ROOT) as temp:
+            root = Path(temp); path = self.write_state(root); before = path.read_bytes()
+            reference = self.reference_evidence(evidence_type="PreflightEvidence", status="PASS", state_path=path)
+            legacy = self.evidence(root, evidence_type="PreflightEvidence", status="PASS", state_path=path)
+            with self.assertRaises(ValueError):
+                transition_project_state(path, expected_current_stage="ACTIVATED_NOT_PREFLIGHTED", expected_current_state_digest=hashlib.sha256(before).hexdigest(), requested_next_stage="PREFLIGHT_PASSED", target_identity_digest="a" * 64, evidence_path=legacy, evidence_source=reference)
+            self.assertEqual(before, path.read_bytes())
 
     def test_guard_blocks_denied_path_and_confirmed_plan_is_exact(self) -> None:
         with tempfile.TemporaryDirectory(dir=ROOT) as temp:

@@ -9,9 +9,12 @@ except ImportError:
 import hashlib
 import json
 from pathlib import Path
-from typing import Any, Mapping
+from typing import Any, Mapping, Sequence
 
-from governance.adoption.evidence_registry import upstream_digests, validate_evidence_file
+from governance.adoption.evidence_registry import validate_historical_evidence_chain
+from governance.adoption.lifecycle_evidence_adapter import (
+    LegacyEvidenceFile, LifecycleEvidenceAdapter, ReferenceEvidence,
+)
 from governance.adoption.installer import digest
 from governance.adoption.io import write_text_atomic
 from governance.adoption.lifecycle_context import snapshot_workspace
@@ -33,9 +36,11 @@ def _raw_digest(path: Path) -> str:
 
 def transition_project_state(
     path: Path, *, expected_current_stage: str, expected_current_state_digest: str,
-    evidence_path: Path, requested_next_stage: str, target_identity_digest: str,
+    evidence_path: Path | None = None, requested_next_stage: str, target_identity_digest: str,
+    evidence_source: ReferenceEvidence | None = None,
+    prior_reference_evidence: Sequence[ReferenceEvidence] = (),
 ) -> dict[str, Any]:
-    """Validate the registered evidence file, then atomically compare-and-swap state."""
+    """Validate one explicit evidence source, then atomically compare-and-swap state."""
     lock_path = path.with_name(f".{path.name}.lifecycle.lock")
     lock_path.parent.mkdir(parents=True, exist_ok=True)
     with lock_path.open("a+", encoding="utf-8") as lock:
@@ -51,20 +56,51 @@ def transition_project_state(
         validate_mapping(value, "project_state.schema.json"); ProjectState.from_mapping(value)
         if value.get("lifecycle_stage") != expected_current_stage or NEXT.get(expected_current_stage) != requested_next_stage:
             raise ValueError("STATE_TRANSITION_BLOCKED: invalid lifecycle state transition")
-        evidence, evidence_file_digest = validate_evidence_file(
-            evidence_path, previous_stage=expected_current_stage, next_stage=requested_next_stage,
+        if (evidence_path is None) == (evidence_source is None):
+            raise ValueError("STATE_TRANSITION_BLOCKED: exactly one current evidence source is required")
+        references = tuple(prior_reference_evidence)
+        if any(not isinstance(source, ReferenceEvidence) for source in references):
+            raise ValueError("STATE_TRANSITION_BLOCKED: prior reference evidence is invalid")
+        by_digest = {source.binding.reference.sha256: source for source in references}
+        if len(by_digest) != len(references):
+            raise ValueError("STATE_TRANSITION_BLOCKED: duplicate prior reference evidence")
+        used_reference_digests: set[str] = set()
+        adapter = LifecycleEvidenceAdapter()
+
+        def resolve_prior(item: Mapping[str, Any], previous_stage: str, next_stage: str, upstream: list[str]) -> str:
+            source = by_digest.get(item["evidence_digest"])
+            if source is None:
+                raise ValueError("STATE_TRANSITION_BLOCKED: prior reference evidence is missing")
+            result = adapter.resolve(
+                source, previous_stage=previous_stage, next_stage=next_stage,
+                target_identity_digest=target_identity_digest,
+                previous_state_digest=item["previous_state_digest"], expected_upstream=upstream,
+            )
+            used_reference_digests.add(result.evidence_digest)
+            return result.evidence_digest
+
+        frozen_upstream = validate_historical_evidence_chain(
+            value, target_identity_digest=target_identity_digest, resolve_reference=resolve_prior,
+        )
+        if used_reference_digests != set(by_digest):
+            raise ValueError("STATE_TRANSITION_BLOCKED: unused prior reference evidence")
+        source = LegacyEvidenceFile(evidence_path) if evidence_path is not None else evidence_source
+        normalized = adapter.resolve(
+            source, previous_stage=expected_current_stage, next_stage=requested_next_stage,
             target_identity_digest=target_identity_digest, previous_state_digest=current_digest,
-            expected_upstream=upstream_digests(value),
+            expected_upstream=frozen_upstream,
         )
         updated = dict(value)
         updated["lifecycle_stage"] = requested_next_stage
         updated["lifecycle_evidence"] = [
             *value.get("lifecycle_evidence", []),
-            {"stage": requested_next_stage, "evidence_type": evidence["evidence_type"],
-             "evidence_digest": evidence_file_digest, "evidence_file_digest": evidence_file_digest,
-             "evidence_file": str(evidence_path.expanduser().resolve(strict=True)),
+            {"stage": requested_next_stage, "evidence_type": normalized.content["evidence_type"],
+             "evidence_digest": normalized.evidence_digest,
              "previous_state_digest": current_digest, "target_identity_digest": target_identity_digest,
-             "upstream_evidence_digests": upstream_digests(value)},
+             "upstream_evidence_digests": frozen_upstream,
+             **({"evidence_file_digest": normalized.evidence_digest,
+                 "evidence_file": str(normalized.legacy_path.expanduser().resolve(strict=True))}
+                if normalized.legacy_path is not None else {})},
         ]
         if requested_next_stage == "CLOSED":
             updated["closure_completed"] = True
