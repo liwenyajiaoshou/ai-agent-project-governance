@@ -23,7 +23,14 @@ from governance.adoption.lifecycle import transition_project_state  # noqa: E402
 from governance.adoption.evidence_registry import upstream_digests  # noqa: E402
 from governance.adoption.runtime_artifact_compiler import digest_bytes  # noqa: E402
 from governance.adoption.installer import digest  # noqa: E402
-from governance.adoption.framework_upgrade import compile_framework_upgrade, install_framework_upgrade  # noqa: E402
+from governance.adoption.framework_upgrade import (  # noqa: E402
+    approve_pre_release_generated_template_upgrade,
+    compile_framework_upgrade,
+    compile_pre_release_generated_template_upgrade,
+    install_framework_upgrade,
+    install_pre_release_generated_template_upgrade,
+    preflight_pre_release_generated_template_upgrade,
+)
 
 
 COMMANDS = {
@@ -43,6 +50,10 @@ COMMANDS = {
     "compile-framework-upgrade": "Preview the bounded v1.5.1-to-v1.5.2 changed-only framework upgrade.",
     "approve-framework-upgrade": "Record explicit Owner approval for one upgrade preview.",
     "upgrade-approved": "Install one exact approved changed-only framework upgrade.",
+    "compile-pre-release-template-upgrade": "Preview the exact v1.5.2 generated-template schema repair.",
+    "approve-pre-release-template-upgrade": "Record explicit Owner approval for one template-repair preview.",
+    "preflight-pre-release-template-upgrade": "Verify an approved template-repair writeset without writing.",
+    "upgrade-pre-release-template-approved": "Install one preflighted exact generated-template repair.",
 }
 
 
@@ -144,6 +155,14 @@ def build_parser() -> argparse.ArgumentParser:
     upgrade_approval.add_argument("--candidate", type=Path, required=True); upgrade_approval.add_argument("--output", type=Path, required=True); upgrade_approval.add_argument("--owner-approved", action="store_true", required=True)
     upgrade_install = subcommands.add_parser("upgrade-approved", help=COMMANDS["upgrade-approved"])
     upgrade_install.add_argument("--source-root", type=Path, required=True); upgrade_install.add_argument("--target-project-root", type=Path, required=True); upgrade_install.add_argument("--manifest", type=Path, required=True); upgrade_install.add_argument("--approval", type=Path, required=True); upgrade_install.add_argument("--receipt-output", type=Path, required=True)
+    template_upgrade = subcommands.add_parser("compile-pre-release-template-upgrade", help=COMMANDS["compile-pre-release-template-upgrade"])
+    template_upgrade.add_argument("--source-root", type=Path, required=True); template_upgrade.add_argument("--target-project-root", type=Path, required=True); template_upgrade.add_argument("--output", type=Path, required=True)
+    template_approval = subcommands.add_parser("approve-pre-release-template-upgrade", help=COMMANDS["approve-pre-release-template-upgrade"])
+    template_approval.add_argument("--candidate", type=Path, required=True); template_approval.add_argument("--output", type=Path, required=True); template_approval.add_argument("--owner-approved", action="store_true", required=True)
+    template_preflight = subcommands.add_parser("preflight-pre-release-template-upgrade", help=COMMANDS["preflight-pre-release-template-upgrade"])
+    template_preflight.add_argument("--target-project-root", type=Path, required=True); template_preflight.add_argument("--manifest", type=Path, required=True); template_preflight.add_argument("--approval", type=Path, required=True); template_preflight.add_argument("--output", type=Path, required=True)
+    template_install = subcommands.add_parser("upgrade-pre-release-template-approved", help=COMMANDS["upgrade-pre-release-template-approved"])
+    template_install.add_argument("--source-root", type=Path, required=True); template_install.add_argument("--target-project-root", type=Path, required=True); template_install.add_argument("--manifest", type=Path, required=True); template_install.add_argument("--approval", type=Path, required=True); template_install.add_argument("--preflight", type=Path, required=True); template_install.add_argument("--receipt-output", type=Path, required=True)
     return parser
 
 
@@ -278,6 +297,20 @@ def _approve_framework_upgrade(args: argparse.Namespace, _: argparse.ArgumentPar
 def _upgrade_approved(args: argparse.Namespace, _: argparse.ArgumentParser) -> None:
     install_framework_upgrade(args.source_root, args.target_project_root, args.manifest, args.approval, args.receipt_output)
 
+def _compile_pre_release_template_upgrade(args: argparse.Namespace, _: argparse.ArgumentParser) -> None:
+    compile_pre_release_generated_template_upgrade(args.source_root, args.target_project_root, args.output)
+
+def _approve_pre_release_template_upgrade(args: argparse.Namespace, _: argparse.ArgumentParser) -> None:
+    if not args.owner_approved:
+        raise ValueError("explicit --owner-approved is required")
+    write_json_exclusive(args.output, approve_pre_release_generated_template_upgrade(load_mapping(args.candidate)))
+
+def _preflight_pre_release_template_upgrade(args: argparse.Namespace, _: argparse.ArgumentParser) -> None:
+    write_json_exclusive(args.output, preflight_pre_release_generated_template_upgrade(args.target_project_root, args.manifest, args.approval))
+
+def _upgrade_pre_release_template_approved(args: argparse.Namespace, _: argparse.ArgumentParser) -> None:
+    install_pre_release_generated_template_upgrade(args.source_root, args.target_project_root, args.manifest, args.approval, args.preflight, args.receipt_output)
+
 
 HANDLERS = {
     "dry-run": _dry_run,
@@ -296,6 +329,10 @@ HANDLERS = {
     "compile-framework-upgrade": _compile_framework_upgrade,
     "approve-framework-upgrade": _approve_framework_upgrade,
     "upgrade-approved": _upgrade_approved,
+    "compile-pre-release-template-upgrade": _compile_pre_release_template_upgrade,
+    "approve-pre-release-template-upgrade": _approve_pre_release_template_upgrade,
+    "preflight-pre-release-template-upgrade": _preflight_pre_release_template_upgrade,
+    "upgrade-pre-release-template-approved": _upgrade_pre_release_template_approved,
 }
 
 

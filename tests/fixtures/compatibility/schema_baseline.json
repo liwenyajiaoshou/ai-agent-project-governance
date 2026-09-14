@@ -892,6 +892,16 @@
       "/properties/release_gate/properties/test_timeout_seconds": "integer"
     }
   },
+  "durable_evidence_object.schema.json": {
+    "required": ["object_id", "sha256", "byte_length", "evidence_type", "schema_id", "schema_version", "metadata", "created_at"],
+    "enums": {},
+    "types": {}
+  },
+  "durable_evidence_reference.schema.json": {
+    "required": ["object_id", "sha256", "byte_length", "evidence_type", "schema_id", "schema_version"],
+    "enums": {},
+    "types": {}
+  },
   "workspace_assignment.schema.json": {
     "required": [
       "workspace_assignment_id",

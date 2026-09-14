@@ -22,6 +22,10 @@
 
 - Recovery and upgrade remain local-only, approval-bound, digest-bound, state-limited, and fail closed on drift; neither path authorizes business-data writes, network access, Git writes, or release operations.
 
+### Fixed
+
+- Reconciled the governance schema baseline from 43 to 45, including Durable Evidence contracts, and added a bounded `v1.5.2` pre-release generated-template repair that accepts only the exact known pre-fix bytes.
+
 ## [1.5.1] - 2026-09-10
 
 ### Changed

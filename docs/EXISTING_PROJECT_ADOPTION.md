@@ -51,6 +51,7 @@ Note: Artifacts generated before `v1.2.0` do not carry the Git-HEAD-blob provena
 | `compile-contract-recovery` / `approve-contract-recovery` / `recover-approved` | Preview, explicitly approve, then atomically rebind only an `ACTIVATED_NOT_PREFLIGHTED` Runtime. |
 | `adoption-preflight` | Run the canonical adoption-aware bridge and record the `PREFLIGHT_PASSED` transition. |
 | `compile-framework-upgrade` / `approve-framework-upgrade` / `upgrade-approved` | Apply only an exact approved, drift-free `v1.5.1 → v1.5.2` changed-asset writeset. |
+| `compile-pre-release-template-upgrade` / `approve-pre-release-template-upgrade` / `preflight-pre-release-template-upgrade` / `upgrade-pre-release-template-approved` | Apply only the two-file `v1.5.2` pre-release generated-template schema repair, from the fixed `6743aa4` baseline. This is not a same-version overwrite facility. |
 
 All commands are local-only and do not authorize network access, Git writes, production actions, or deployment.
 

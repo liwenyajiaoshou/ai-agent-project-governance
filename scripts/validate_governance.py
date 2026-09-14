@@ -88,8 +88,8 @@ def validate_schemas(root: Path, errors: list[str]) -> dict[str, dict[str, Any]]
             errors.append(f"Cannot load schema {path.relative_to(root)}: {exc}")
         except Exception as exc:
             errors.append(f"Invalid schema {path.relative_to(root)}: {exc}")
-    if len(schemas) != 43:
-        errors.append(f"Expected 43 schemas, found {len(schemas)}")
+    if len(schemas) != 45:
+        errors.append(f"Expected 45 schemas, found {len(schemas)}")
     return schemas
 
 
@@ -139,14 +139,14 @@ def main() -> int:
         return 2
     validate_documents(root, errors)
     schemas = validate_schemas(root, errors)
-    if len(schemas) == 43:
+    if len(schemas) == 45:
         validate_yaml_contracts(root, schemas, errors)
     if errors:
         print(f"Governance baseline validation: FAIL ({len(errors)} issue(s))")
         for error in errors:
             print(f"- {error}")
         return 1
-    print("Governance baseline validation: PASS (43 schemas, rules index, module registry, references)")
+    print("Governance baseline validation: PASS (45 schemas, rules index, module registry, references)")
     return 0
 
 

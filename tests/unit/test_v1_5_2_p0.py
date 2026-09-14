@@ -15,7 +15,16 @@ from governance.adoption.contract_viability import adoption_lifecycle_viability,
 from governance.adoption.installer import digest
 from governance.adoption.recovery import compile_contract_recovery, recover_approved
 from governance.adoption.runtime_artifact_compiler import MANIFEST_FILENAME
-from governance.adoption.framework_upgrade import compile_framework_upgrade, install_framework_upgrade
+from governance.adoption.framework_upgrade import (
+    PRE_RELEASE_TEMPLATE_BASELINE_COMMIT,
+    PRE_RELEASE_TEMPLATE_FILES,
+    approve_pre_release_generated_template_upgrade,
+    compile_framework_upgrade,
+    compile_pre_release_generated_template_upgrade,
+    install_framework_upgrade,
+    install_pre_release_generated_template_upgrade,
+    preflight_pre_release_generated_template_upgrade,
+)
 from governance.adoption.lifecycle_context import build_lifecycle_context, run_adoption_preflight
 from governance.adoption.evidence_registry import upstream_digests
 from governance.adoption.lifecycle import transition_project_state
@@ -25,6 +34,80 @@ from tests.unit import test_agent_adopt_activation as activation_fixture
 
 
 class V152P0Test(unittest.TestCase):
+    def _pre_release_template_target(self, source: Path, base: Path) -> Path:
+        target = base / "template"
+        target.mkdir()
+        (target / "VERSION").write_text("1.5.2\n", encoding="utf-8")
+        for relative in PRE_RELEASE_TEMPLATE_FILES:
+            result = subprocess.run(
+                ["git", "show", f"{PRE_RELEASE_TEMPLATE_BASELINE_COMMIT}:{relative}"],
+                cwd=source, capture_output=True, check=True,
+            )
+            destination = target / relative
+            destination.parent.mkdir(parents=True, exist_ok=True)
+            destination.write_bytes(result.stdout)
+        return target
+
+    def test_pre_release_template_upgrade_is_exact_and_preflighted(self):
+        source = Path(__file__).resolve().parents[2]
+        with tempfile.TemporaryDirectory(dir="/tmp") as temp:
+            base = Path(temp)
+            target = self._pre_release_template_target(source, base)
+            manifest_path = base / "preview.json"
+            manifest = compile_pre_release_generated_template_upgrade(source, target, manifest_path)
+            self.assertEqual("1.5.2", manifest["from_version"])
+            self.assertEqual("1.5.2", manifest["to_version"])
+            self.assertEqual(list(PRE_RELEASE_TEMPLATE_FILES), manifest["writeset"])
+            self.assertEqual(PRE_RELEASE_TEMPLATE_BASELINE_COMMIT, manifest["source_baseline_commit"])
+            self.assertTrue(manifest["source_baseline_digest"])
+            self.assertTrue(all(asset["expected_old_sha256"] for asset in manifest["assets"]))
+            approval_path = base / "approval.json"
+            approval_path.write_text(json.dumps(approve_pre_release_generated_template_upgrade(manifest)), encoding="utf-8")
+            preflight_path = base / "preflight.json"
+            preflight = preflight_pre_release_generated_template_upgrade(target, manifest_path, approval_path)
+            preflight_path.write_text(json.dumps(preflight), encoding="utf-8")
+            receipt = install_pre_release_generated_template_upgrade(source, target, manifest_path, approval_path, preflight_path, base / "receipt.json")
+            self.assertEqual("UPGRADED", receipt["status"])
+            self.assertEqual("PASS", receipt["post_upgrade_validation"])
+            for relative in PRE_RELEASE_TEMPLATE_FILES:
+                self.assertEqual((source / relative).read_bytes(), (target / relative).read_bytes())
+
+    def test_pre_release_template_upgrade_rejects_unknown_user_drift(self):
+        source = Path(__file__).resolve().parents[2]
+        with tempfile.TemporaryDirectory(dir="/tmp") as temp:
+            base = Path(temp)
+            target = self._pre_release_template_target(source, base)
+            (target / PRE_RELEASE_TEMPLATE_FILES[0]).write_text("user drift\n", encoding="utf-8")
+            with self.assertRaisesRegex(ValueError, "UPGRADE_UNKNOWN_LOCAL_DRIFT"):
+                compile_pre_release_generated_template_upgrade(source, target, base / "preview.json")
+
+    def test_pre_release_template_upgrade_mixed_drift_has_no_partial_write(self):
+        source = Path(__file__).resolve().parents[2]
+        with tempfile.TemporaryDirectory(dir="/tmp") as temp:
+            base = Path(temp)
+            target = self._pre_release_template_target(source, base)
+            untouched = (target / PRE_RELEASE_TEMPLATE_FILES[0]).read_bytes()
+            (target / PRE_RELEASE_TEMPLATE_FILES[1]).write_text("user drift\n", encoding="utf-8")
+            with self.assertRaisesRegex(ValueError, "UPGRADE_UNKNOWN_LOCAL_DRIFT"):
+                compile_pre_release_generated_template_upgrade(source, target, base / "preview.json")
+            self.assertEqual(untouched, (target / PRE_RELEASE_TEMPLATE_FILES[0]).read_bytes())
+
+    def test_pre_release_template_upgrade_is_noop_when_already_current(self):
+        source = Path(__file__).resolve().parents[2]
+        with tempfile.TemporaryDirectory(dir="/tmp") as temp:
+            base = Path(temp)
+            target = self._pre_release_template_target(source, base)
+            for relative in PRE_RELEASE_TEMPLATE_FILES:
+                (target / relative).write_bytes((source / relative).read_bytes())
+            manifest = compile_pre_release_generated_template_upgrade(source, target, base / "preview.json")
+            self.assertEqual([], manifest["writeset"])
+            approval_path = base / "approval.json"
+            approval_path.write_text(json.dumps(approve_pre_release_generated_template_upgrade(manifest)), encoding="utf-8")
+            preflight_path = base / "preflight.json"
+            preflight_path.write_text(json.dumps(preflight_pre_release_generated_template_upgrade(target, base / "preview.json", approval_path)), encoding="utf-8")
+            receipt = install_pre_release_generated_template_upgrade(source, target, base / "preview.json", approval_path, preflight_path, base / "receipt.json")
+            self.assertEqual([], receipt["installed_files"])
+
     def test_viability_is_adoption_specific_and_requires_exact_state_scope(self):
         generic = {"write_scope":{"allow":[], "deny":[]}}
         self.assertEqual("ZERO_WRITE_FULL_ADOPTION_UNSUPPORTED", adoption_lifecycle_viability(generic)["reason_codes"][0])
